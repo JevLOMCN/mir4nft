@@ -27,13 +27,10 @@ try {
 } catch (\Exception $e) {
     $log->debug("Fatal Exception " . $e->getMessage(), ["trace" => $e->getTrace()]);
     $log->error("Fatal Exception " . $e->getMessage());
-    exit(1);
 } catch (\Throwable $e) {
     $log->debug("Fatal Throwable " . $e->getMessage(), ["trace" => $e->getTrace()]);
     $log->error("Fatal Throwable " . $e->getMessage());
-    exit(1);
 } catch (\Error $e) {
     $log->debug("Fatal Error " . $e->getMessage(), ["trace" => $e->getTrace()]);
     $log->error("Fatal Error " . $e->getMessage());
-    exit(1);
 }
