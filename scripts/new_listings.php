@@ -39,3 +39,7 @@ try {
     $log->debug("Fatal Error " . $e->getMessage(), ["trace" => $e->getTrace()]);
     $log->error("Fatal Error " . $e->getMessage());
 }
+
+// should never get here
+echo ("Fatal Error: NewListingsConsumer exited unexpectedly\n");
+exit(1);
