@@ -49,7 +49,7 @@ class NewListingsConsumer
             $this->log->debug("NewListingsConsumer inserting new listing", [$query]);
             $this->sql->query($query);
             foreach ($this->stat_checks as $stat_check) {
-                $this->publish('stat_checker', [
+                $this->mq->publish('stat_checker', [
                     'seq' => $seq,
                     'transportID' => $transportID,
                     'stat_check' => $stat_check
