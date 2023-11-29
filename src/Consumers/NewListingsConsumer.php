@@ -3,7 +3,7 @@
 namespace RPurinton\Mir4nft\Consumers;
 
 use React\Async;
-use RPurinton\Mir4nft\{RabbitConsumer, Log, MySQL, Error};
+use RPurinton\Mir4nft\{RabbitConsumer, RabbitPublisher, Log, MySQL, Error};
 use Bunny\{Async\Client, Channel, Message};
 
 class NewListingsConsumer
@@ -39,6 +39,8 @@ class NewListingsConsumer
             if ($listing['seq'] <= $max_seq) continue;
             $new_listings[] = $listing;
         }
+        if (!count($new_listings)) return;
+        $pub = new RabbitPublisher() or throw new Error("failed to create RabbitPublisher");
         foreach (array_reverse($new_listings) as $listing) {
             $this->log->debug("NewListingsConsumer received new listing", [$listing]);
             $listing = $this->sql->escape($listing);
@@ -62,7 +64,7 @@ class NewListingsConsumer
                     'stat_check' => $stat_check
                 ];
                 $this->log->debug("NewListingsConsumer publishing stat check", [$payload]);
-                $this->mq->publish('stat_checker', $payload) or throw new Error("failed to publish stat check");
+                $pub->publish('stat_checker', $payload) or throw new Error("failed to publish stat check");
             }
         }
     }
