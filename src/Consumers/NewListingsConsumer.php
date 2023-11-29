@@ -67,6 +67,8 @@ class NewListingsConsumer
                 $pub->publish('stat_checker', $payload) or throw new Error("failed to publish stat check");
             }
         }
+        $pub->disconnect() or throw new Error("failed to disconnect from RabbitMQ");
+        unset($pub);
     }
 
     private function validateData($data): bool
