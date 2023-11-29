@@ -40,8 +40,7 @@ class RabbitMQ
             print_r($e);
         } catch (\Exception $e) {
             print_r($e);
-        }
-    } finally {
+        } finally {
             if (isset($channel) && $channel) $channel->close();
             if (isset($client) && $client) $client->disconnect();
         }
