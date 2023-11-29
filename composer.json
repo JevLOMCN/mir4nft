@@ -8,7 +8,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Rpurinton\\Mir4nft\\": "src/"
+            "RPurinton\\Mir4nft\\": "src/"
         }
     },
     "authors": [
@@ -19,6 +19,7 @@
     ],
     "require": {
         "react/async": "^4.2",
-        "bunny/bunny": "@dev"
+        "bunny/bunny": "@dev",
+        "monolog/monolog": "^3.5"
     }
 }
