@@ -9,7 +9,6 @@ class MySQL
 
     public function __construct(private Log $log)
     {
-        $this->log->debug("MySQL ready");
     }
 
     public function connect(): bool
