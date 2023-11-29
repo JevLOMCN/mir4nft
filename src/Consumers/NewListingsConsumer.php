@@ -16,8 +16,12 @@ class NewListingsConsumer
 
     public function __construct(private Log $log, private MySQL $sql, private RabbitMQ $mq)
     {
-        $mq->connect("new_listings", $this->process(...)) or throw new Error("failed to connect to new_listings queue");
-        $this->log->debug("NewListingsConsumer initialized!");
+    }
+
+    public function run(): bool
+    {
+        $this->mq->connect("new_listings", $this->process(...)) or throw new Error("failed to connect to new_listings queue");
+        return true;
     }
 
     public function process(Message $message, Channel $channel, Client $client): void

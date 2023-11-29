@@ -22,8 +22,7 @@ try {
 }
 
 try {
-    $me = new NewListingsConsumer($log, new MySQL($log)) or throw new Error("failed to create NewListingsConsumer");
-    $me->connect() or throw new Error("NewListingsConsumer failed to connect");
+    $me = new NewListingsConsumer($log, new MySQL($log), new RabbitMQ()) or throw new Error("failed to create NewListingsConsumer");
 } catch (\Exception $e) {
     $log->debug("Fatal Exception " . $e->getMessage(), ["trace" => $e->getTrace()]);
     $log->error("Fatal Exception " . $e->getMessage());
