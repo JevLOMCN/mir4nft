@@ -37,7 +37,7 @@ class NewListingsConsumer extends RabbitMQ
             $this->log->debug("NewListingsConsumer received new listing", [$listing]);
             $listing = $this->sql->escape($listing);
             extract($listing);
-            $this->sql->insert("INSERT INTO `mir4trades` (
+            $query = "IINSERT INTO `mir4trades` (
                     `seq`, `transportID`, `nftID`, `sealedDT`, `characterName`,
                     `class`, `lv`, `powerScore`, `price`,
                     `MirageScore`, `MiraX`, `Reinforce`
@@ -45,7 +45,9 @@ class NewListingsConsumer extends RabbitMQ
                     '$seq', '$transportID', '$nftID', '$sealedDT', '$characterName',
                     '$class', '$lv', '$powerScore', '$price',
                     '$MirageScore', '$MiraX', '$Reinforce'
-            );");
+            );";
+            $this->log->debug("NewListingsConsumer inserting new listing", [$query]);
+            $this->sql->query($query);
             foreach ($this->stat_checks as $stat_check) {
                 $this->publish('stat_checker', [
                     'seq' => $seq,
