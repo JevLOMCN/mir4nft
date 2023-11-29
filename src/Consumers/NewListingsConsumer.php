@@ -2,9 +2,8 @@
 
 namespace RPurinton\Mir4nft\Consumers;
 
-use React\Async;
-use RPurinton\Mir4nft\{RabbitConsumer, RabbitPublisher, Log, MySQL, Error};
-use Bunny\{Async\Client, Channel, Message};
+use React\EventLoop\{Loop, LoopInterface};
+use RPurinton\Mir4nft\{RabbitPublisher, Log, MySQL, Error};
 
 class NewListingsConsumer
 {
@@ -14,15 +13,14 @@ class NewListingsConsumer
         "training", "holystuff", "assets", "potential", "codex"
     ];
 
-    public function __construct(private Log $log, private MySQL $sql, private RabbitConsumer $mq)
+    public function __construct(private Log $log, private MySQL $sql, private ?LoopInterface $loop = null)
     {
+        $this->loop = $loop ?? Loop::get();
     }
 
     public function run(): bool
     {
         $this->sql->connect() or throw new Error("failed to connect to mysql");
-        $connect_result = $this->mq->connect("new_listings", $this->process(...)) or throw new Error("failed to connect to new_listings queue");
-        $this->log->debug("NewListingsConsumer connected to new_listings queue", [$connect_result]);
         return true;
     }
 

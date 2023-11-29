@@ -2,23 +2,21 @@
 
 namespace RPurinton\Mir4nft;
 
-use React\{Async, EventLoop\Loop, EventLoop\LoopInterface};
-use Bunny\{Async\Client, Channel, Message};
+use React\{Async, EventLoop\LoopInterface};
+use Bunny\{Async\Client, Channel};
 
 class RabbitConsumer
 {
-    protected ?LoopInterface $loop = null;
     private ?Client $client = null;
     private ?Channel $channel = null;
     private ?string $consumerTag = null;
     private ?string $queue = null;
 
-    public function connect(string $queue, callable $process): mixed
+    public function connect(LoopInterface $loop, string $queue, callable $process): mixed
     {
         $this->queue = $queue;
-        $this->loop = Loop::get();
         $this->consumerTag = bin2hex(random_bytes(8));
-        $this->client = new Client($this->loop, Config::get("rabbitmq")) or throw new Error('Failed to establish the client');
+        $this->client = new Client($loop, Config::get("rabbitmq")) or throw new Error('Failed to establish the client');
         $this->client = Async\await($this->client->connect()) or throw new Error('Failed to establish the connection');
         $this->channel = Async\await($this->client->channel()) or throw new Error('Failed to establish the channel');
         Async\await($this->channel->qos(0, 1)) or throw new Error('Failed to set the QoS');
