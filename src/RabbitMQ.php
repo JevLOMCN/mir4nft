@@ -36,6 +36,8 @@ class RabbitMQ
             print_r($e);
         } catch (\Exception $e) {
             print_r($e);
+        } catch (\Bunny\Exception\BunnyException $e) {
+            print_r($e);
         }
         return $result;
     }
