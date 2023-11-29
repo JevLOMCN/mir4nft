@@ -16,9 +16,9 @@ class RabbitMQ
     private ?Channel $channel;
     private ?string $consumerTag;
 
-    public function __construct(private Log $log, private string $queue, private callable $callback)
+    public function __construct(private string $queue)
     {
-        $this->connect() or throw new Error('Failed to establish the connection');
+        $this->connect() or throw new Error('Failed to connect to RabbitMQ');
     }
 
     public function connect(): bool
@@ -31,39 +31,22 @@ class RabbitMQ
         Async\await($this->channel->qos(0, 1)) or throw new Error('Failed to set the QoS');
         Async\await($this->channel->queueDeclare($this->queue)) or throw new Error('Failed to declare the queue');
         $this->channel->consume($this->process(...), $this->queue, $this->consumerTag) or throw new Error('Failed to consume the queue');
-        $this->log->debug("RabbitMQ consuming.") or throw new Error('Failed to log');
         return true;
     }
 
     public function process(Message $message, Channel $channel, Client $client)
     {
-        unset($message->headers["delivery-mode"]);
-        if (!isset($message->headers["Via"])) $message->headers["Via"] = "RabbitMQ";
-        $message->headers["Content"] = $message->content;
-        $this->log->debug("Received message", $message->headers);
-        if (isset($message->headers["Die"]) && $message->headers["Die"]) {
-            $this->log->info("Received die message... D: goodbye cruel world.");
-            $this->log->info($this->queue . " has died. :(...");
-            $channel->ack($message)->then(function () use ($client) {
-                $client->disconnect();
-                exit(0);
-            });
-        } else {
-            if (($this->callback)($message->headers)) return $channel->ack($message);
-            $channel->nack($message);
-        }
+        Async\await($channel->ack($message)) or throw new Error('Failed to ack the message');
     }
 
     public function publish(string $queue, array $data): bool
     {
-        if (!$this->channel) {
-            throw new Error('Attempted to publish to a queue without an active channel');
-        }
-        $this->channel->queueDeclare($queue);
+        if (!$this->channel) throw new Error('Attempted to publish to a queue without an active channel');
+        Async\await($this->channel->queueDeclare($queue)) or throw new Error('Failed to declare the queue');
         return Async\await($this->channel->publish(json_encode($data), [], '', $queue));
     }
 
-    public function disconnect()
+    public function disconnect(): bool
     {
         if (isset($this->channel)) {
             $this->channel->cancel($this->consumerTag);
@@ -73,10 +56,11 @@ class RabbitMQ
         if (isset($this->client)) {
             $this->client->disconnect();
         }
+        return true;
     }
 
     public function __destruct()
     {
-        $this->disconnect();
+        $this->disconnect() or throw new Error('Failed to disconnect from RabbitMQ');
     }
 }

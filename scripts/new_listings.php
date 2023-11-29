@@ -3,9 +3,11 @@
 
 namespace RPurinton\Mir4nft;
 
+$worker_id = $argv[1] ?? 0;
+
 try {
     require_once __DIR__ . "/../Composer.php";
-    $log = LogFactory::create("new_listings") or throw new Error("failed to create log");
+    $log = LogFactory::create("new_listings-$worker_id") or throw new Error("failed to create log");
 } catch (\Exception $e) {
     echo ("Fatal Exception " . $e->getMessage() . "\n");
     exit(1);
@@ -18,8 +20,8 @@ try {
 }
 
 try {
-    $skull = new Skull($log, __DIR__, $myName) or throw new \Exception("failed to create skull");
-    $skull->run($argv) or throw new \Exception("skull failed to run");
+    $mq = new RabbitMQ($log, __DIR__, $myName) or throw new Error("failed to create RabbitMQ client");
+    $mq->connect() or throw new Error("failed to connect to RabbitMQ");
 } catch (\Exception $e) {
     $log->debug("Fatal Exception " . $e->getMessage(), ["trace" => $e->getTrace()]);
     $log->error("Fatal Exception " . $e->getMessage());
