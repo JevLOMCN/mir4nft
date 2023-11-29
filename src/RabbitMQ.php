@@ -26,16 +26,15 @@ class RabbitMQ
         return Async\await($this->channel->consume($process, $this->queue, $this->consumerTag, false, true)) or throw new Error('Failed to consume the queue');
     }
 
-    public function process(Message $message, Channel $channel, Client $client): void
-    {
-        throw new Error('RabbitMQ::process() must be overridden');
-    }
-
     public function publish(string $queue, array $data): bool
     {
         if (!$this->channel) throw new Error('Attempted to publish to a queue without an active channel');
         Async\await($this->channel->queueDeclare($queue)) or throw new Error('Failed to declare the queue');
-        return Async\await($this->channel->publish(json_encode($data), [], '', $queue));
+        $publishPromise = $this->channel->publish(json_encode($data), [], '', $queue);
+        $publishPromise->then(null, function ($e) {
+            throw new Error('Failed to publish the message: ' . $e->getMessage());
+        });
+        return Async\await($publishPromise);
     }
 
     public function disconnect(): bool
