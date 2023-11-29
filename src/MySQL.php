@@ -62,10 +62,12 @@ class MySQL
         return mysqli_fetch_assoc($result);
     }
 
-    public function escape($text)
+    public function escape(mixed $text): mixed
     {
+        if (is_array($text)) return array_map($this->escape(...), $text);
         return mysqli_real_escape_string($this->sql, $text);
     }
+
     public function single($query)
     {
         try {
