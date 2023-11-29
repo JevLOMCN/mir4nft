@@ -3,7 +3,7 @@
 namespace RPurinton\Mir4nft\Consumers;
 
 use React\Async;
-use RPurinton\Mir4nft\{RabbitMQ, Log, MySQL, Error};
+use RPurinton\Mir4nft\{RabbitConsumer, Log, MySQL, Error};
 use Bunny\{Async\Client, Channel, Message};
 
 class NewListingsConsumer
@@ -14,7 +14,7 @@ class NewListingsConsumer
         "training", "holystuff", "assets", "potential", "codex"
     ];
 
-    public function __construct(private Log $log, private MySQL $sql, private RabbitMQ $mq)
+    public function __construct(private Log $log, private MySQL $sql, private RabbitConsumer $mq)
     {
     }
 

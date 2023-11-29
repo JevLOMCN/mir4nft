@@ -27,7 +27,8 @@ try {
 }
 
 try {
-    $me = new NewListingsConsumer($log, new MySQL($log), new RabbitMQ()) or throw new Error("failed to create NewListingsConsumer");
+    set_exception_handler('global_exception_handler');
+    $me = new NewListingsConsumer($log, new MySQL($log), new RabbitConsumer()) or throw new Error("failed to create NewListingsConsumer");
     $me->run() or throw new Error("failed to run NewListingsConsumer");
     $log->info("NewListingsConsumer running...");
 } catch (\Exception $e) {
@@ -39,4 +40,11 @@ try {
 } catch (\Error $e) {
     $log->debug("Fatal Error " . $e->getMessage(), ["trace" => $e->getTrace()]);
     $log->error("Fatal Error " . $e->getMessage());
+}
+
+function global_exception_handler($e)
+{
+    global $log;
+    $log->debug("Fatal Exception " . $e->getMessage(), ["trace" => $e->getTrace()]);
+    $log->error("Fatal Exception " . $e->getMessage());
 }

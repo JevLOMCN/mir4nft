@@ -5,7 +5,7 @@ namespace RPurinton\Mir4nft;
 use React\{Async, EventLoop\Loop, EventLoop\LoopInterface};
 use Bunny\{Async\Client, Channel, Message};
 
-class RabbitMQ
+class RabbitConsumer
 {
     protected ?LoopInterface $loop = null;
     private ?Client $client = null;
