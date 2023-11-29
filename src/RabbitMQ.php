@@ -25,13 +25,12 @@ class RabbitMQ
         $this->channel = Async\await($this->client->channel()) or throw new Error('Failed to establish the channel');
         Async\await($this->channel->qos(0, 1)) or throw new Error('Failed to set the QoS');
         Async\await($this->channel->queueDeclare($this->queue)) or throw new Error('Failed to declare the queue');
-        $this->channel->consume($this->process(...), $this->queue, $this->consumerTag) or throw new Error('Failed to consume the queue');
+        $this->channel->consume($this->process(...), $this->queue, $this->consumerTag, false, true) or throw new Error('Failed to consume the queue');
         return true;
     }
 
     public function process(Message $message, Channel $channel, Client $client)
     {
-        Async\await($channel->ack($message)) or throw new Error('Failed to ack the message');
     }
 
     public function publish(string $queue, array $data): bool
