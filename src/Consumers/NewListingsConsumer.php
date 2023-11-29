@@ -6,7 +6,7 @@ use React\Async;
 use RPurinton\Mir4nft\{RabbitMQ, Log, MySQL, Error};
 use Bunny\{Async\Client, Channel, Message};
 
-class NewListingsConsumer extends RabbitMQ
+class NewListingsConsumer
 {
     private array $stat_checks = [
         "summary", "inven", "skills", "stats", "spirit",
@@ -14,9 +14,9 @@ class NewListingsConsumer extends RabbitMQ
         "training", "holystuff", "assets", "potential", "codex"
     ];
 
-    public function __construct(private Log $log, private MySQL $sql)
+    public function __construct(private Log $log, private MySQL $sql, private RabbitMQ $mq)
     {
-        parent::__construct('new_listings');
+        $mq->connect("new_listings", $this->process(...)) or throw new Error("failed to connect to new_listings queue");
         $this->log->debug("NewListingsConsumer initialized!");
     }
 
