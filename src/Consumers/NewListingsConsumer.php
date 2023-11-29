@@ -20,6 +20,7 @@ class NewListingsConsumer
 
     public function run(): bool
     {
+        $this->sql->connect() or throw new Error("failed to connect to mysql");
         $this->mq->connect("new_listings", $this->process(...)) or throw new Error("failed to connect to new_listings queue");
         return true;
     }
