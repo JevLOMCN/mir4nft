@@ -25,23 +25,6 @@ class RabbitConsumer
         return Async\await($this->channel->consume($process, $this->queue, $this->consumerTag, false, true)) or throw new Error('Failed to consume the queue');
     }
 
-    public function publish(string $queue, array $data): bool
-    {
-        $result = false;
-        try {
-            $result = $this->channel->publish(json_encode($data), [], '', $queue) or throw new Error('Failed to publish the message');
-        } catch (\Throwable $e) {
-            print_r($e);
-        } catch (\Error $e) {
-            print_r($e);
-        } catch (\Exception $e) {
-            print_r($e);
-        } catch (\Bunny\Exception\BunnyException $e) {
-            print_r($e);
-        }
-        return $result;
-    }
-
     public function disconnect(): bool
     {
         if (isset($this->channel)) {
