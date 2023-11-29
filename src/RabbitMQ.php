@@ -2,23 +2,18 @@
 
 namespace RPurinton\Mir4nft;
 
-use React\Async;
-use React\EventLoop\Loop;
-use React\EventLoop\LoopInterface;
-use Bunny\Async\Client;
-use Bunny\Channel;
-use Bunny\Message;
+use React\{Async, EventLoop\Loop, EventLoop\LoopInterface};
+use Bunny\{Async\Client, Channel, Message};
 
 class RabbitMQ
 {
-    private ?LoopInterface $loop;
-    private ?Client $client;
-    private ?Channel $channel;
-    private ?string $consumerTag;
+    private ?LoopInterface $loop = null;
+    private ?Client $client = null;
+    private ?Channel $channel = null;
+    private ?string $consumerTag = null;
 
     public function __construct(private string $queue)
     {
-        $this->connect() or throw new Error('Failed to connect to RabbitMQ');
     }
 
     public function connect(): bool

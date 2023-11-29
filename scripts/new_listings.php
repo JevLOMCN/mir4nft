@@ -3,6 +3,8 @@
 
 namespace RPurinton\Mir4nft;
 
+use RPurinton\Mir4nft\Consumers\NewListingsConsumer;
+
 $worker_id = $argv[1] ?? 0;
 
 try {
@@ -20,8 +22,8 @@ try {
 }
 
 try {
-    $mq = new RabbitMQ($log, __DIR__, $myName) or throw new Error("failed to create RabbitMQ client");
-    $mq->connect() or throw new Error("failed to connect to RabbitMQ");
+    $me = new NewListingsConsumer($log, new MySQL($log));
+    $me->connect() or throw new Error("failed to connect to RabbitMQ");
 } catch (\Exception $e) {
     $log->debug("Fatal Exception " . $e->getMessage(), ["trace" => $e->getTrace()]);
     $log->error("Fatal Exception " . $e->getMessage());

@@ -7,10 +7,10 @@ class MySQL
 {
     private $sql;
 
-    public function __construct()
+    public function __construct(private Log $log)
     {
         $this->connect();
-        $this->disconnect();
+        $this->log->debug("MySQL ready");
     }
 
     public function connect(): bool
@@ -18,9 +18,10 @@ class MySQL
         try {
             extract(Config::get("mysql")) or throw new Error("failed to extract mysql config");
             $this->sql = mysqli_connect($hostname, $username, $password, $database) or throw new Error("failed to connect to mysql");
+            $this->log->debug("MySQL connected");
             return true;
         } catch (\mysqli_sql_exception $e) {
-            throw new Error($e->getMessage());
+            throw new Error($e->getMessage(), $e->getCode(), $e);
         }
         return false;
     }
