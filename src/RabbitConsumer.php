@@ -29,7 +29,7 @@ class RabbitConsumer
     {
         $result = false;
         try {
-            $result = Async\await($this->channel->publish(json_encode($data), [], '', $queue)) or throw new Error('Failed to publish the message');
+            $result = $this->channel->publish(json_encode($data), [], '', $queue) or throw new Error('Failed to publish the message');
         } catch (\Throwable $e) {
             print_r($e);
         } catch (\Error $e) {
