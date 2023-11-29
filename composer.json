@@ -1,0 +1,21 @@
+{
+    "name": "rpurinton/mir4nft",
+    "description": "Mir4 NFT MySQL Database",
+    "type": "project",
+    "require-dev": {
+        "phpunit/phpunit": "^10.4"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Rpurinton\\Mir4nft\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Russell Purinton",
+            "email": "russell.purinton@icloud.com"
+        }
+    ],
+    "require": {}
+}
