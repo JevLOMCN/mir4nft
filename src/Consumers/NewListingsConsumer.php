@@ -54,12 +54,15 @@ class NewListingsConsumer
             );";
             $this->log->debug("NewListingsConsumer inserting new listing", [$query]);
             $this->sql->query($query);
+            $this->log->debug("NewListingsConsumer published stat checks", [$seq, $transportID]);
             foreach ($this->stat_checks as $stat_check) {
-                $this->mq->publish('stat_checker', [
+                $payload = [
                     'seq' => $seq,
                     'transportID' => $transportID,
                     'stat_check' => $stat_check
-                ]);
+                ];
+                $this->log->debug("NewListingsConsumer publishing stat check", [$payload]);
+                $this->mq->publish('stat_checker', $payload);
             }
         }
     }
