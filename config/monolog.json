@@ -1,0 +1,22 @@
+[
+    {
+        "path": "php://stdout",
+        "level": "DEBUG"
+    },
+    {
+        "path": "logs/error.log",
+        "level": "ERROR"
+    },
+    {
+        "path": "logs/info.log",
+        "level": "INFO"
+    },
+    {
+        "path": "logs/warning.log",
+        "level": "WARNING"
+    },
+    {
+        "path": "logs/debug.log",
+        "level": "DEBUG"
+    }
+]
