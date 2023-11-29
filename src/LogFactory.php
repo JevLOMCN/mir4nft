@@ -10,7 +10,7 @@ class LogFactory
     static function create($name): Log
     {
         $log = self::pushHandlers(self::createLogger($name), self::getConfigs());
-        $log->debug("Log initialized!");
+        $log->debug("Log created");
         return $log;
     }
 
@@ -38,13 +38,13 @@ class LogFactory
 
     static function getConfigs(): array
     {
-        return Config::get('monolog');
+        return Config::get('logs');
     }
 
     static function validateConfig(array $config): void
     {
         if (!isset($config['path'], $config['level'])) {
-            throw new Error("Logging path or level not defined in config/log.json!");
+            throw new Error("Logging path or level not defined in config/logs.json!");
         }
     }
 
@@ -73,7 +73,7 @@ class LogFactory
             'CRITICAL' => Level::Critical,
             'ALERT' => Level::Alert,
             'EMERGENCY' => Level::Emergency,
-            default => throw new Error("Invalid logging level ($level) set in config/logging.json!"),
+            default => throw new Error("Invalid logging level ($level) set in config/logs.json!"),
         };
     }
 }
