@@ -17,5 +17,8 @@
             "email": "russell.purinton@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "react/async": "^4.2",
+        "bunny/bunny": "@dev"
+    }
 }
