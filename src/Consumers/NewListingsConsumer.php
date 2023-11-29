@@ -62,7 +62,7 @@ class NewListingsConsumer
                     'stat_check' => $stat_check
                 ];
                 $this->log->debug("NewListingsConsumer publishing stat check", [$payload]);
-                $this->mq->publish('stat_checker', $payload);
+                $this->mq->publish('stat_checker', $payload) or throw new Error("failed to publish stat check");
             }
         }
     }
