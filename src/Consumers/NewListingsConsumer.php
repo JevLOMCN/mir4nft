@@ -14,9 +14,14 @@ class NewListingsConsumer extends RabbitMQ
         $this->log->debug("NewListingsConsumer initialized!");
     }
 
-    public function process(Message $message, Channel $channel, Client $client)
+    public function process(Message $message, Channel $channel, Client $client): void
     {
         $data = json_decode($message->content, true);
-        $this->log->debug("NewListingsConsumer received message", $data);
+        if ($data) {
+            $this->log->debug("NewListingsConsumer received message", $data);
+            //$seq = $this->sql->insert("INSERT INTO listings (listing_id, item_id, item_name, item_type, item_grade, item_level, item_price, item_quantity, item_seller, item_server, item_time) VALUES ({$data['listing_id']}, {$data['item_id']}, '{$data['item_name']}', '{$data['item_type']}', {$data['item_grade']}, {$data['item_level']}, {$data['item_price']}, {$data['item_quantity']}, '{$data['item_seller']}', '{$data['item_server']}', {$data['item_time']})");
+        } else {
+            $this->log->error("NewListingsConsumer received invalid message", [$message->content]);
+        }
     }
 }

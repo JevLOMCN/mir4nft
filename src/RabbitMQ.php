@@ -29,7 +29,7 @@ class RabbitMQ
         return true;
     }
 
-    public function process(Message $message, Channel $channel, Client $client)
+    public function process(Message $message, Channel $channel, Client $client): void
     {
     }
 
