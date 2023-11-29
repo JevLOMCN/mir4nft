@@ -23,6 +23,7 @@ try {
 
 try {
     $me = new NewListingsConsumer($log, new MySQL($log), new RabbitMQ()) or throw new Error("failed to create NewListingsConsumer");
+    $me->run() or throw new Error("failed to run NewListingsConsumer");
 } catch (\Exception $e) {
     $log->debug("Fatal Exception " . $e->getMessage(), ["trace" => $e->getTrace()]);
     $log->error("Fatal Exception " . $e->getMessage());
