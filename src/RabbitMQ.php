@@ -28,9 +28,18 @@ class RabbitMQ
 
     public function publish(string $queue, array $data): bool
     {
-        if (!$this->channel) throw new Error('Attempted to publish to a queue without an active channel');
-        $this->channel->queueDeclare($queue) or throw new Error('Failed to declare the queue');
-        $this->channel->publish(json_encode($data), [], '', $queue) or throw new Error('Failed to publish to the queue');
+        try {
+            $client = new Client(Loop::get(), Config::get("rabbitmq")) or throw new Error('Failed to establish the client');
+            $client = Async\await($client->connect()) or throw new Error('Failed to establish the connection');
+            $channel = Async\await($client->channel()) or throw new Error('Failed to establish the channel');
+            Async\await($channel->queueDeclare($queue)) or throw new Error('Failed to declare the queue');
+            Async\await($channel->publish(json_encode($data), [], '', $queue)) or throw new Error('Failed to publish the message');
+        } catch (\Throwable $e) {
+            throw new Error($e->getMessage());
+        } finally {
+            if ($channel) $channel->close();
+            if ($client) $client->disconnect();
+        }
         return true;
     }
 
