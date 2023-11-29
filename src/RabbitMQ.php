@@ -35,7 +35,7 @@ class RabbitMQ
             Async\await($channel->queueDeclare($queue)) or throw new Error('Failed to declare the queue');
             Async\await($channel->publish(json_encode($data), [], '', $queue)) or throw new Error('Failed to publish the message');
         } catch (\Throwable $e) {
-            throw new Error($e->getMessage());
+            print_r($e);
         } finally {
             if (isset($channel) && $channel) $channel->close();
             if (isset($client) && $client) $client->disconnect();
