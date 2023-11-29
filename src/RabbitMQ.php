@@ -29,8 +29,8 @@ class RabbitMQ
     public function publish(string $queue, array $data): bool
     {
         if (!$this->channel) throw new Error('Attempted to publish to a queue without an active channel');
-        $this->channel->queueDeclare($queue);
-        $this->channel->publish(json_encode($data), [], '', $queue);
+        $this->channel->queueDeclare($queue) or throw new Error('Failed to declare the queue');
+        $this->channel->publish(json_encode($data), [], '', $queue) or throw new Error('Failed to publish to the queue');
         return true;
     }
 
