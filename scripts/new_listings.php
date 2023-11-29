@@ -7,6 +7,11 @@ use RPurinton\Mir4nft\Consumers\NewListingsConsumer;
 
 $worker_id = $argv[1] ?? 0;
 
+// enable all errors for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
+
 try {
     require_once __DIR__ . "/../Composer.php";
     $log = LogFactory::create("new_listings-$worker_id") or throw new Error("failed to create log");
