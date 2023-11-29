@@ -19,7 +19,10 @@ class NewListingsConsumer extends RabbitMQ
         $data = json_decode($message->content, true);
         if ($data) {
             $this->log->debug("NewListingsConsumer received message", $data);
-            //$seq = $this->sql->insert("INSERT INTO listings (listing_id, item_id, item_name, item_type, item_grade, item_level, item_price, item_quantity, item_seller, item_server, item_time) VALUES ({$data['listing_id']}, {$data['item_id']}, '{$data['item_name']}', '{$data['item_type']}', {$data['item_grade']}, {$data['item_level']}, {$data['item_price']}, {$data['item_quantity']}, '{$data['item_seller']}', '{$data['item_server']}', {$data['item_time']})");
+            // TODO: validate the message
+            // TODO: get the current max sequence number from the database
+            // TODO: iterate through the listings and insert any new ones
+            // TODO: for each new listing publish messages to the stat checker queue
         } else {
             $this->log->error("NewListingsConsumer received invalid message", [$message->content]);
         }
