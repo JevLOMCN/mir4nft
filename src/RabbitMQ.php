@@ -37,8 +37,8 @@ class RabbitMQ
         } catch (\Throwable $e) {
             throw new Error($e->getMessage());
         } finally {
-            if ($channel) $channel->close();
-            if ($client) $client->disconnect();
+            if (isset($channel) && $channel) $channel->close();
+            if (isset($client) && $client) $client->disconnect();
         }
         return true;
     }
