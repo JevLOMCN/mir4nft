@@ -2,7 +2,7 @@
 
 namespace RPurinton\Mir4nft\Consumers;
 
-use Bunny\Message;
+use Bunny\{Channel, Message};
 use React\EventLoop\{LoopInterface};
 use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error};
 use RPurinton\Mir4nft\RabbitMQ\{Consumer};
@@ -20,12 +20,13 @@ class StatCheckConsumer
         return true;
     }
 
-    public function stats_callback(Message $message): bool
+    public function stats_callback(Message $message, Channel $channel): bool
     {
         $this->log->debug("received stats callback", [$message->content]);
         $data = json_decode($message->content, true);
         $this->validate_stats_callback($data) or throw new Error("received invalid stats callback");
         $this->insert_stats($data) or throw new Error("failed to insert stats");
+        $channel->ack($message);
         return true;
     }
 

@@ -21,7 +21,7 @@ class Consumer
         $this->client = Async\await($this->client->connect()) or throw new Error('Failed to establish the connection');
         $this->channel = Async\await($this->client->channel()) or throw new Error('Failed to establish the channel');
         $this->channel->qos(0, 1) or throw new Error('Failed to set the QoS');
-        return Async\await($this->channel->consume($process, $this->queue, $this->consumerTag, false, true)) or throw new Error('Failed to consume the queue');
+        return Async\await($this->channel->consume($process, $this->queue, $this->consumerTag)) or throw new Error('Failed to consume the queue');
     }
 
     public function disconnect(): bool
