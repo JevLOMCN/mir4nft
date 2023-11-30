@@ -32,5 +32,14 @@ try {
 }
 $loop = Loop::get();
 $nlc = new NewListingsConsumer($log, new MySQL($log), $loop) or throw new Error("failed to create NewListingsConsumer");
-
+$nlc->init() or throw new Error("failed to initialize NewListingsConsumer");
+$loop->addSignal(SIGINT, function () use ($loop, $log) {
+    $log->info("SIGINT received, exiting...");
+    $loop->stop();
+});
+$loop->addSignal(SIGTERM, function () use ($loop, $log) {
+    $log->info("SIGTERM received, exiting...");
+    $loop->stop();
+});
+$loop->run();
 $log->info("NewListingsConsumer running...");
