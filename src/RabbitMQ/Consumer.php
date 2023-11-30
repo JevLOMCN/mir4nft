@@ -1,11 +1,12 @@
 <?php
 
-namespace RPurinton\Mir4nft;
+namespace RPurinton\Mir4nft\RabbitMQ;
 
+use RPurinton\Mir4nft\{Config, Error};
 use React\{Async, EventLoop\LoopInterface};
 use Bunny\{Async\Client, Channel};
 
-class RabbitConsumer
+class Consumer
 {
     private ?Client $client = null;
     private ?Channel $channel = null;

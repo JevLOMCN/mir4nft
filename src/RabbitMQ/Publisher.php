@@ -1,10 +1,11 @@
 <?php
 
-namespace RPurinton\Mir4nft;
+namespace RPurinton\Mir4nft\RabbitMQ;
 
+use RPurinton\Mir4nft\{Config, Error};
 use Bunny\{Client, Channel};
 
-class RabbitPublisher
+class Publisher
 {
     private ?Client $client = null;
     private ?Channel $channel = null;
