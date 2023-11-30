@@ -47,7 +47,10 @@ class NewListingsConsumer
 
     public function timer(): void
     {
-        $message = @file_get_contents($this->base_url . $this->lists_url . http_build_query($this->http_query));
+        $this->log->debug("NewListingsConsumer timer fired");
+        $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
+        $this->log->debug("NewListingsConsumer requesting new listings", [$url]);
+        $message = @file_get_contents($url);
         $this->log->debug("NewListingsConsumer received message", [$message]);
         $data = json_decode($message, true);
         $this->validate_data($data) or throw new Error("received invalid message");
