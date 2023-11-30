@@ -3,6 +3,7 @@
 
 namespace RPurinton\Mir4nft;
 
+use React\EventLoop\{Loop, LoopInterface};
 use RPurinton\Mir4nft\Consumers\NewListingsConsumer;
 
 $worker_id = $argv[1] ?? 0;
@@ -11,13 +12,12 @@ $worker_id = $argv[1] ?? 0;
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-
 try {
     require_once __DIR__ . "/../Composer.php";
     $log = LogFactory::create("new_listings-$worker_id") or throw new Error("failed to create log");
     set_exception_handler(function ($e) use ($log) {
         $log->debug($e->getMessage(), ["trace" => $e->getTrace()]);
-        $log->error($e->getMessage());
+        $log->error($e->getMessage() . "\nCheck debug.log for more details.");
         exit(1);
     });
 } catch (\Exception $e) {
@@ -30,6 +30,7 @@ try {
     echo ("Fatal Error " . $e->getMessage() . "\n");
     exit(1);
 }
-$me = new NewListingsConsumer($log, new MySQL($log), new RabbitConsumer()) or throw new Error("failed to create NewListingsConsumer");
-$me->run() or throw new Error("failed to run NewListingsConsumer");
+$loop = Loop::get();
+$nlc = new NewListingsConsumer($log, new MySQL($log), $loop) or throw new Error("failed to create NewListingsConsumer");
+
 $log->info("NewListingsConsumer running...");
