@@ -37,8 +37,12 @@ class NewListingsConsumer
 
     public function init(): bool
     {
+        $this->timer();
         $result = $this->loop->addPeriodicTimer(15, [$this, 'timer']) or throw new Error("failed to add periodic timer");
-        return $result instanceof TimerInterface;
+        $success = $result instanceof TimerInterface;
+        if ($success) $this->log->info("periodic timer added");
+        else $this->log->error("failed to add periodic timer");
+        return $success;
     }
 
     private function update_max_seq()
@@ -111,7 +115,17 @@ class NewListingsConsumer
                 '$transportID', '$nftID', '$sealedDT', '$characterName',
                 '$class', '$lv', '$powerScore', '$price',
                 '$MirageScore', '$MiraX', '$Reinforce'
-            ) ON DUPLICATE KEY UPDATE `transportID` = `transportID`;
+            ) ON DUPLICATE KEY UPDATE
+                `nftID` = '$nftID',
+                `sealedDT` = '$sealedDT',
+                `characterName` = '$characterName',
+                `class` = '$class',
+                `lv` = '$lv',
+                `powerScore` = '$powerScore',
+                `price` = '$price',
+                `MirageScore` = '$MirageScore',
+                `MiraX` = '$MiraX',
+                `Reinforce` = '$Reinforce';
             INSERT INTO `sequence` (
                 `seq`, `transportID`
             ) VALUES (
