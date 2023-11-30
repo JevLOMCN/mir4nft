@@ -50,10 +50,12 @@ class NewListingsConsumer
         $this->log->debug("NewListingsConsumer timer fired");
         $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
         $this->log->debug("NewListingsConsumer requesting new listings", [$url]);
-        $message = file_get_contents($url);
-        $this->log->debug("NewListingsConsumer received message", [$message]);
-        $data = json_decode($message, true);
-        $this->validate_data($data) or throw new Error("received invalid message");
+        $ch = curl_init($url) or throw new Error("failed to initialize curl");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true) or throw new Error("failed to set curl option");
+        $response = curl_exec($ch) or throw new Error("failed to execute curl");
+        $this->log->debug("NewListingsConsumer received response", [$response]);
+        $data = json_decode($response, true);
+        $this->validate_data($data) or throw new Error("received invalid response");
         $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
     }
 
