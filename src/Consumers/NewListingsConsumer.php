@@ -37,8 +37,8 @@ class NewListingsConsumer
 
     public function init(): bool
     {
-        extract($this->sql->single("SELECT MAX(`seq`) as `max_seq` FROM `sequence`;")) or throw new Error("failed to get max seq");
-        $this->max_seq = $max_seq;
+        $result = $this->sql->single("SELECT MAX(`seq`) as `max_seq` FROM `sequence`;") or throw new Error("failed to get max seq");
+        $this->max_seq = $result['max_seq'] ?? 0;
         $result = $this->loop->addPeriodicTimer(15, $this->timer(...) or throw new Error("failed to add periodic timer"));
         return $result instanceof TimerInterface;
     }
