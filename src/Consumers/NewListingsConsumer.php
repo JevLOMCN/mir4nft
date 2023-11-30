@@ -114,7 +114,7 @@ class NewListingsConsumer
                 '$seq', '$transportID'
             ) ON DUPLICATE KEY UPDATE `seq` = `seq`;";
         $this->log->debug("inserting new listing", [$query]);
-        $this->sql->multi($query) or throw new Error("failed to insert new listing");
+        $this->sql->multi($query);
         return [$seq, $transportID];
     }
 
