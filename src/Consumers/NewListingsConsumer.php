@@ -2,8 +2,10 @@
 
 namespace RPurinton\Mir4nft\Consumers;
 
+use Bunny\{Async\Client, Channel, Message};
 use React\EventLoop\{LoopInterface, TimerInterface};
-use RPurinton\Mir4nft\{RabbitMQ\Publisher, Log, MySQL, Error};
+use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error};
+use RPurinton\Mir4nft\RabbitMQ\{Consumer, Publisher};
 
 class NewListingsConsumer
 {
@@ -53,16 +55,10 @@ class NewListingsConsumer
 
     public function timer(): void
     {
-        $this->log->debug("NewListingsConsumer timer fired");
+        $this->log->debug("timer fired");
         $this->update_max_seq();
         $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
-        $response = file_get_contents($url, false, stream_context_create([
-            'http' => [
-                'method' => 'GET',
-                'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) " .
-                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36\r\n"
-            ]
-        ])) or throw new Error("failed to get contents");
+        $response = HTTPS::get($url) or throw new Error("failed to get url");
         $data = json_decode($response, true);
         $this->validate_data($data) or throw new Error("received invalid response");
         $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
@@ -96,8 +92,8 @@ class NewListingsConsumer
 
     private function process_listing(array $listing): bool
     {
-        $this->max_seq = max($listing['seq'], $this->max_seq);
         $this->log->debug("received new listing", [$listing]);
+        $this->max_seq = max($listing['seq'], $this->max_seq);
         [$seq, $transportID] = $this->insert_records($listing) or throw new Error("failed to insert records");
         $this->stat_checks($seq, $transportID) or throw new Error("failed to publish stat checks");
         $this->log->debug("published stat checks", [$transportID]);
@@ -138,10 +134,11 @@ class NewListingsConsumer
 
     private function stat_checks($seq, $transportID): bool
     {
-        $this->log->debug("NewListingsConsumer published stat checks", [$transportID]);
+        $this->log->debug("publishing stat checks", [$transportID]);
         foreach ($this->stat_checks as $stat_check) {
             $this->stat_check($seq, $transportID, $stat_check) or throw new Error("failed to publish stat check");
         }
+        $this->log->debug("published stat checks", [$transportID]);
         return true;
     }
 
@@ -159,7 +156,7 @@ class NewListingsConsumer
                 'languageCode' => 'en',
             ])
         ];
-        $this->log->debug("NewListingsConsumer publishing stat check", [$payload]);
+        $this->log->debug("publishing stat check", [$payload]);
         if (!$this->pub) $this->pub = new Publisher() or throw new Error("failed to create Publisher");
         $this->pub->publish('stat_checker', $payload) or throw new Error("failed to publish stat check");
         return true;
