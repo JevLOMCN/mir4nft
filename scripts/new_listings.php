@@ -42,4 +42,3 @@ $loop->addSignal(SIGTERM, function () use ($loop, $log) {
     $loop->stop();
 });
 $loop->run();
-$log->info("NewListingsConsumer running...");
