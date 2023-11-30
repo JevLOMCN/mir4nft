@@ -138,7 +138,6 @@ class NewListingsConsumer
         foreach ($this->stat_checks as $stat_check) {
             $this->stat_check($seq, $transportID, $stat_check) or throw new Error("failed to publish stat check");
         }
-        $this->log->debug("published stat checks", [$transportID]);
         return true;
     }
 
