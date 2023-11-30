@@ -52,6 +52,8 @@ class NewListingsConsumer
         $this->log->debug("NewListingsConsumer requesting new listings", [$url]);
         $ch = curl_init($url) or throw new Error("failed to initialize curl");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true) or throw new Error("failed to set curl option");
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " .
+            "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36") or throw new Error("failed to set curl option");
         $response = curl_exec($ch) or throw new Error("failed to execute curl");
         $this->log->debug("NewListingsConsumer received response", [$response]);
         $data = json_decode($response, true);
