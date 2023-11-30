@@ -26,6 +26,7 @@ class MySQL
 
     private function connectIfNeeded(): bool
     {
+        if (!$this->sql) return $this->connect();
         if (mysqli_ping($this->sql)) return true;
         return $this->connect();
     }
