@@ -20,7 +20,7 @@ class Consumer
         $this->client = new Client($loop, Config::get("rabbitmq")) or throw new Error('Failed to establish the client');
         $this->client = Async\await($this->client->connect()) or throw new Error('Failed to establish the connection');
         $this->channel = Async\await($this->client->channel()) or throw new Error('Failed to establish the channel');
-        Async\await($this->channel->qos(0, 1)) or throw new Error('Failed to set the QoS');
+        $this->channel->qos(0, 1) or throw new Error('Failed to set the QoS');
         return Async\await($this->channel->consume($process, $this->queue, $this->consumerTag, false, true)) or throw new Error('Failed to consume the queue');
     }
 
