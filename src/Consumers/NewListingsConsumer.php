@@ -68,7 +68,7 @@ class NewListingsConsumer
     private function process_listings(array $listings): bool
     {
         $new_listings = $this->filter_listings($listings);
-        if (!count($new_listings)) return;
+        if (!count($new_listings)) return true;
         foreach (array_reverse($new_listings) as $listing) {
             $this->process_listing($listing) or throw new Error("failed to process listing");
         }
