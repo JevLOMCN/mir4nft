@@ -1,0 +1,15 @@
+[Unit]
+Description=Mi4rnft Target
+Wants=mir4nft-new-listings.service
+Wants=mir4nft-stat-checker@1.service
+Wants=mir4nft-stat-checker@2.service
+Wants=mir4nft-stat-checker@3.service
+Wants=mir4nft-stat-checker@4.service
+Wants=mir4nft-stat-checker@5.service
+Wants=mir4nft-stat-checker@6.service
+Wants=mir4nft-stat-checker@7.service
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
