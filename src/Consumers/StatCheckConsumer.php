@@ -15,6 +15,7 @@ class StatCheckConsumer
 
     public function init(): bool
     {
+        $this->sql->connect() or throw new Error("failed to connect to MySQL");
         $this->mq->connect($this->loop, "stat_checker", [$this, 'stats_callback']) or throw new Error("failed to connect to stat_check queue");
         return true;
     }
