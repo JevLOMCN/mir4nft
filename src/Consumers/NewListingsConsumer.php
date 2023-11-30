@@ -48,7 +48,6 @@ class NewListingsConsumer
     public function timer(): void
     {
         $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
-        $this->log->debug("NewListingsConsumer received response", [$response]);
         $response = file_get_contents($url, false, stream_context_create([
             'http' => [
                 'method' => 'GET',
@@ -66,7 +65,7 @@ class NewListingsConsumer
         return is_array($data) && isset($data['data']['lists']) && is_array($data['data']['lists']);
     }
 
-    private function process_listings(array $listings): void
+    private function process_listings(array $listings): bool
     {
         $new_listings = $this->filter_listings($listings);
         if (!count($new_listings)) return;
@@ -74,6 +73,7 @@ class NewListingsConsumer
             $this->process_listing($listing) or throw new Error("failed to process listing");
         }
         $this->pub = null;
+        return true;
     }
 
     private function filter_listings(array $listings): array
