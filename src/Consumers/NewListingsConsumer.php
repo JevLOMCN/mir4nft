@@ -47,15 +47,15 @@ class NewListingsConsumer
 
     public function timer(): void
     {
-        $this->log->debug("NewListingsConsumer timer fired");
         $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
-        $this->log->debug("NewListingsConsumer requesting new listings", [$url]);
-        $ch = curl_init($url) or throw new Error("failed to initialize curl");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true) or throw new Error("failed to set curl option");
-        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " .
-            "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36") or throw new Error("failed to set curl option");
-        $response = curl_exec($ch) or throw new Error("failed to execute curl");
         $this->log->debug("NewListingsConsumer received response", [$response]);
+        $response = file_get_contents($url, false, stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) " .
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36\r\n"
+            ]
+        ])) or throw new Error("failed to get contents");
         $data = json_decode($response, true);
         $this->validate_data($data) or throw new Error("received invalid response");
         $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
