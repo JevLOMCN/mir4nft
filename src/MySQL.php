@@ -69,8 +69,7 @@ class MySQL
     public function single($query)
     {
         try {
-            $this->connectIfNeeded() or throw new Error('MySQL connect failed');
-            $result = mysqli_query($this->sql, $query) or throw new Error('MySQL query error: ' . mysqli_error($this->sql));
+            $result = $this->query($query);
         } catch (\mysqli_sql_exception $e) {
             throw new Error($e->getMessage());
         } finally {
