@@ -58,7 +58,9 @@ class NewListingsConsumer
         $this->log->debug("timer fired");
         $this->update_max_seq();
         $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
+        $this->log->debug("getting url", [$url]);
         $response = HTTPS::get($url) or throw new Error("failed to get url");
+        $this->log->debug("received response", [$response]);
         $data = json_decode($response, true);
         $this->validate_data($data) or throw new Error("received invalid response");
         $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
