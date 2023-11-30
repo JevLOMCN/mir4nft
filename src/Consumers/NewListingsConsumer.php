@@ -48,6 +48,7 @@ class NewListingsConsumer
     public function timer(): void
     {
         $message = @file_get_contents($this->base_url . $this->lists_url . http_build_query($this->http_query));
+        $this->log->debug("NewListingsConsumer received message", [$message]);
         $data = json_decode($message, true);
         $this->validate_data($data) or throw new Error("received invalid message");
         $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
@@ -55,7 +56,7 @@ class NewListingsConsumer
 
     private function validate_data($data): bool
     {
-        return !is_null($data) && is_array($data) && isset($data['data']['lists']) && is_array($data['data']['lists']);
+        return is_array($data) && isset($data['data']['lists']) && is_array($data['data']['lists']);
     }
 
     private function process_listings(array $listings): void
