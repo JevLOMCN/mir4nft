@@ -37,7 +37,6 @@ class NewListingsConsumer
 
     public function init(): bool
     {
-        $this->update_max_seq();
         $result = $this->loop->addPeriodicTimer(15, [$this, 'timer']) or throw new Error("failed to add periodic timer");
         return $result instanceof TimerInterface;
     }
@@ -50,6 +49,8 @@ class NewListingsConsumer
 
     public function timer(): void
     {
+        $this->log->debug("NewListingsConsumer timer fired");
+        $this->update_max_seq();
         $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
         $response = file_get_contents($url, false, stream_context_create([
             'http' => [
