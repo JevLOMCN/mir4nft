@@ -32,7 +32,7 @@ class Bootstrapper
     ];
     private ?Publisher $pub = null;
 
-    public function __construct(private Log $log, private MySQL $sql, private LoopInterface $loop)
+    public function __construct(private Log $log, private MySQL $sql)
     {
     }
 

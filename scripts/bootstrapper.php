@@ -31,8 +31,7 @@ try {
     echo ("Fatal Error " . $e->getMessage() . "\n");
     exit(1);
 }
-$loop = Loop::get();
-$nlc = new Bootstrapper($log, new MySQL($log), $loop) or throw new Error("failed to create Bootstrapper");
+$nlc = new Bootstrapper($log, new MySQL($log)) or throw new Error("failed to create Bootstrapper");
 $nlc->init() or throw new Error("failed to initialize Bootstrapper");
 $loop->addSignal(SIGINT, function () use ($loop, $log) {
     $log->info("SIGINT received, exiting...");
