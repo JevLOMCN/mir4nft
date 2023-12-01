@@ -95,8 +95,8 @@ class NewListingsConsumer
     {
         $this->log->debug("received new listing", [$listing]);
         $this->max_seq = max($listing['seq'], $this->max_seq);
-        [$seq, $transportID] = $this->insert_records($listing) or throw new Error("failed to insert records");
-        $this->stat_checks($seq, $transportID) or throw new Error("failed to publish stat checks");
+        [$seq, $transportID, $class] = $this->insert_records($listing) or throw new Error("failed to insert records");
+        $this->stat_checks($seq, $transportID, $class) or throw new Error("failed to publish stat checks");
         $this->log->debug("published stat checks", [$transportID]);
         return true;
     }
@@ -130,19 +130,19 @@ class NewListingsConsumer
             `Reinforce` = '$Reinforce';";
         $this->log->debug("inserting new listing", [$query]);
         $this->sql->multi($query);
-        return [$seq, $transportID];
+        return [$seq, $transportID, $class];
     }
 
-    private function stat_checks($seq, $transportID): bool
+    private function stat_checks($seq, $transportID, $class): bool
     {
         $this->log->debug("publishing stat checks", [$transportID]);
         foreach ($this->stat_checks as $stat_check) {
-            $this->stat_check($seq, $transportID, $stat_check) or throw new Error("failed to publish stat check");
+            $this->stat_check($seq, $transportID, $class, $stat_check) or throw new Error("failed to publish stat check");
         }
         return true;
     }
 
-    private function stat_check($seq, $transportID, $stat_check): bool
+    private function stat_check($seq, $transportID, $class, $stat_check): bool
     {
         if ($stat_check !== "summary") extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `transportID` = '$transportID';")) or throw new Error("failed to get stat check count");
         else extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `seq` = '$seq';")) or throw new Error("failed to get stat check count");
@@ -154,6 +154,7 @@ class NewListingsConsumer
             'stat_url' => $this->base_url . $this->stats_url . $stat_check . '?' . http_build_query([
                 'seq' => $seq,
                 'transportID' => $transportID,
+                'class' => $class,
                 'languageCode' => 'en',
             ])
         ];
