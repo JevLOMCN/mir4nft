@@ -4,7 +4,7 @@
 namespace RPurinton\Mir4nft;
 
 use RPurinton\Mir4nft\{MySQL, Error};
-use RPurinton\Mir4nft\Consumers\Bootstrapper;
+use RPurinton\Mir4nft\Consumers\StatusUpdater;
 
 $worker_id = $argv[1] ?? 0;
 
@@ -30,8 +30,8 @@ try {
     echo ("Fatal Error " . $e->getMessage() . "\n");
     exit(1);
 }
-$nlc = new Bootstrapper($log, new MySQL($log)) or throw new Error("failed to create Bootstrapper");
-$nlc->init() or throw new Error("failed to initialize Bootstrapper");
+$nlc = new StatusUpdater($log, new MySQL($log)) or throw new Error("failed to create StatusUpdater");
+$nlc->init() or throw new Error("failed to initialize StatusUpdater");
 $loop->addSignal(SIGINT, function () use ($loop, $log) {
     $log->info("SIGINT received, exiting...");
     $loop->stop();

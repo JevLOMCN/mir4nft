@@ -39,23 +39,25 @@ class StatCheckConsumer
     {
         extract($data) or throw new Error("failed to extract data");
         $response = HTTPS::get($stat_url) or throw new Error("failed to get url");
-        $response = $this->sql->escape($response) or throw new Error("failed to escape response");
+        $response = $this->sql->escape($response);
         if ($stat_check !== "summary") {
             $query = "INSERT INTO `$stat_check` (
                 `transportID`, `json`
             ) VALUES (
                 '$transportID', '$response'
             ) ON DUPLICATE KEY UPDATE `json` = '$response';";
-            $tradeType = json_decode($response, true)['data']['tradeType'] ?? null;
-            if ($tradeType !== 1) {
-                $tradeType = $this->sql->escape($tradeType) or throw new Error("failed to escape tradeType");
-                $query .= "UPDATE `sequence` SET `tradeType` = '$tradeType' WHERE `seq` = '$seq';";
-            }
-        } else $query = "INSERT INTO `$stat_check` (
+        } else {
+            $query = "INSERT INTO `$stat_check` (
                 `seq`, `json`
             ) VALUES (
                 '$seq', '$response'
             ) ON DUPLICATE KEY UPDATE `json` = '$response';";
+            $tradeType = json_decode($response, true)['data']['tradeType'] ?? null;
+            if ($tradeType !== 1) {
+                $tradeType = $this->sql->escape($tradeType);
+                $query .= "UPDATE `sequence` SET `tradeType` = '$tradeType' WHERE `seq` = '$seq';";
+            }
+        }
         $this->sql->multi($query);
         $this->log->debug("inserted stats", [$query]);
         return true;
