@@ -39,19 +39,19 @@ class StatCheckConsumer
     {
         extract($data) or throw new Error("failed to extract data");
         $response = HTTPS::get($stat_url) or throw new Error("failed to get url");
-        $response = $this->sql->escape($response);
+        $response_escaped = $this->sql->escape($response);
         if ($stat_check !== "summary") {
             $query = "INSERT INTO `$stat_check` (
                 `transportID`, `json`
             ) VALUES (
-                '$transportID', '$response'
-            ) ON DUPLICATE KEY UPDATE `json` = '$response';";
+                '$transportID', '$response_escaped'
+            ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';";
         } else {
             $query = "INSERT INTO `$stat_check` (
                 `seq`, `json`
             ) VALUES (
-                '$seq', '$response'
-            ) ON DUPLICATE KEY UPDATE `json` = '$response';";
+                '$seq', '$response_escaped'
+            ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';";
             $tradeType = json_decode($response, true)['data']['tradeType'] ?? null;
             if ($tradeType !== 1) {
                 $tradeType = $this->sql->escape($tradeType);
