@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 01, 2023 at 09:19 AM
+-- Generation Time: Dec 01, 2023 at 09:22 AM
 -- Server version: 10.5.16-MariaDB
 -- PHP Version: 8.2.13
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -110,11 +110,11 @@ CREATE TABLE `potential` (
 CREATE TABLE `sequence` (
   `seq` bigint(20) UNSIGNED NOT NULL,
   `transportID` bigint(20) UNSIGNED NOT NULL,
-  `price` decimal(10, 2) NOT NULL,
-  `MirageScore` int(11) NOT NULL,
-  `MiraX` bigint(20) NOT NULL,
-  `Reinforce` tinyint(4) NOT NULL,
-  `tradeType` tinyint(4) NOT NULL DEFAULT 1
+  `price` decimal(10, 2) UNSIGNED NOT NULL,
+  `MirageScore` int(11) UNSIGNED NOT NULL,
+  `MiraX` bigint(20) UNSIGNED NOT NULL,
+  `Reinforce` tinyint(4) UNSIGNED NOT NULL,
+  `tradeType` tinyint(4) UNSIGNED NOT NULL DEFAULT 1
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- --------------------------------------------------------
 --
