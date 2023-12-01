@@ -51,7 +51,7 @@ class StatCheckConsumer
             ) VALUES (
                 '$seq', '$response'
             ) ON DUPLICATE KEY UPDATE `json` = '$response';";
-        $this->sql->multi($query) or throw new Error("failed to insert stat");
+        $this->sql->query($query) or throw new Error("failed to insert stat");
         $this->log->debug("inserted stats", [$query]);
         return true;
     }
