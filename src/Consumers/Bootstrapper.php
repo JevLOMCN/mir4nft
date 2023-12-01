@@ -141,8 +141,6 @@ class Bootstrapper
 
     private function stat_check($seq, $transportID, $stat_check): bool
     {
-        extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `transportID` = '$transportID';")) or throw new Error("failed to get stat check count");
-        if ($count) return true;
         $payload = [
             'seq' => $seq,
             'transportID' => $transportID,
