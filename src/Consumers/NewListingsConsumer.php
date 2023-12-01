@@ -9,6 +9,9 @@ use RPurinton\Mir4nft\RabbitMQ\Publisher;
 class NewListingsConsumer
 {
     private int $max_seq = 0;
+    private string $wemix_url = "https://api.mir4global.com/wallet/prices/draco/daily";
+    private array $wemix_data = [];
+    private string $completed_url = "https://webapi.mir4global.com/nft/lists?listType=recent&page=1&class=0&levMin=0&levMax=0&powerMin=0&powerMax=0&priceMin=0&priceMax=0&languageCode=en";
     private string $base_url = "https://webapi.mir4global.com/nft/";
     private string $lists_url = "lists?";
     private array $http_query = [
@@ -30,6 +33,7 @@ class NewListingsConsumer
         "magicorb", "magicstone", "mysticalpiece", "building",
         "training", "holystuff", "assets", "potential", "codex"
     ];
+    private array $pending_sales = [];
     private ?Publisher $pub = null;
 
     public function __construct(private Log $log, private MySQL $sql, private LoopInterface $loop)
@@ -38,11 +42,13 @@ class NewListingsConsumer
 
     public function init(): bool
     {
-        $this->timer();
-        $result = $this->loop->addPeriodicTimer(15, [$this, 'timer']) or throw new Error("failed to add periodic timer");
-        $success = $result instanceof TimerInterface;
-        if ($success) $this->log->info("periodic timer added");
-        else $this->log->error("failed to add periodic timer");
+        $this->timer_300();
+        $this->timer_15();
+        $result1 = $this->loop->addPeriodicTimer(15, [$this, 'timer_15']) or throw new Error("failed to add periodic timer");
+        $result2 = $this->loop->addPeriodicTimer(300, [$this, 'timer_300']) or throw new Error("failed to add periodic timer");
+        $success = $result1 instanceof TimerInterface && $result2 instanceof TimerInterface;
+        if ($success) $this->log->info("periodic timers added");
+        else $this->log->error("failed to add periodic timers");
         return $success;
     }
 
@@ -52,9 +58,49 @@ class NewListingsConsumer
         $this->max_seq = $max_seq;
     }
 
-    public function timer(): void
+    public function timer_300(): void
     {
-        $this->log->debug("timer fired");
+        $this->log->debug("timer_300 fired");
+        $response = HTTPS::post($this->wemix_url, ["Content-type: application/json"]) or throw new Error("failed to get response");
+        $this->update_wemix_data($response) or throw new Error("failed to update wemix data");
+    }
+
+    private function update_wemix_data($response)
+    {
+        $data = json_decode($response, true);
+        $this->validate_wemix_data($data) or throw new Error("received invalid response");
+        $this->parse_wemix_data($data) or throw new Error("failed to parse wemix data");
+        return true;
+    }
+
+    private function validate_wemix_data($data): bool
+    {
+        return is_array($data) && isset($data['Data']) && is_array($data['Data']);
+    }
+
+    private function parse_wemix_data($data): bool
+    {
+        $wemix_data = [];
+        foreach ($data['Data'] as $item) {
+            $CreatedDT = strtotime($item['CreatedDT']);
+            $USDWemixRate = $item['USDWemixRate'];
+            $wemix_data[$CreatedDT] = $USDWemixRate;
+        }
+        $this->wemix_data = array_reverse($wemix_data);
+        return true;
+    }
+
+    private function get_wemix_rate($timestamp)
+    {
+        foreach ($this->wemix_data as $CreatedDT => $USDWemixRate) {
+            if ($timestamp >= $CreatedDT) return $USDWemixRate;
+        }
+        return $USDWemixRate;
+    }
+
+    public function timer_15(): void
+    {
+        $this->log->debug("timer_15 fired");
         $this->update_max_seq();
         $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
         $this->log->debug("getting url", [$url]);
@@ -63,6 +109,7 @@ class NewListingsConsumer
         $data = json_decode($response, true);
         $this->validate_data($data) or throw new Error("received invalid response");
         $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
+        $this->check_completed() or throw new Error("failed to check completed");
     }
 
     private function validate_data($data): bool
@@ -117,6 +164,7 @@ class NewListingsConsumer
             `class` = '$class',
             `lv` = '$lv',
             `powerScore` = '$powerScore';
+        UPDATE `sequence` SET `tradeType` = '2' WHERE `transportID` = '$transportID' AND `tradeType` = '1';
         INSERT INTO `sequence` (
             `seq`, `transportID`, `price`,
             `MirageScore`, `MiraX`, `Reinforce`
@@ -162,5 +210,58 @@ class NewListingsConsumer
         if (!$this->pub) $this->pub = new Publisher() or throw new Error("failed to create Publisher");
         $this->pub->publish('stat_checker', $payload) or throw new Error("failed to publish stat check");
         return true;
+    }
+
+    private function check_completed(): bool
+    {
+        $this->update_pending_sales() or throw new Error("failed to update pending sales");
+        $response = HTTPS::get($this->completed_url) or throw new Error("failed to get completed");
+        $data = json_decode($response, true);
+        $this->validate_completed($data) or throw new Error("received invalid response");
+        $this->process_completed($data['data']['lists']) or throw new Error("failed to process completed");
+        return true;
+    }
+
+    private function update_pending_sales(): bool
+    {
+        $result = $this->sql->query("SELECT `seq`,`transportID` FROM `sequence` WHERE `tradeType` = '1';") or throw new Error("failed to get pending sales");
+        $pending_sales = [];
+        while ($row = $result->fetch_assoc()) {
+            $pending_sales[$row['seq']] = $row['transportID'];
+        }
+        $this->pending_sales = $pending_sales;
+        return true;
+    }
+
+    private function validate_completed($data): bool
+    {
+        return is_array($data) && isset($data['data']['lists']) && is_array($data['data']['lists']);
+    }
+
+    private function process_completed(array $listings): bool
+    {
+        foreach ($listings as $listing) {
+            if (!isset($this->pending_sales[$listing['info']['seq']])) continue;
+            $this->process_completed_listing($listing['info']) or throw new Error("failed to process completed listing");
+        }
+        return true;
+    }
+
+    private function process_completed_listing(array $listing): bool
+    {
+        $this->log->debug("received completed listing", [$listing]);
+        $usd_price = $this->get_usd_price($listing);
+        $seq = $this->sql->escape($listing['seq']);
+        $query = "UPDATE `sequence` SET `tradeType` = '3', `usd_price` = '$usd_price' WHERE `seq` = '$seq';";
+        return true;
+    }
+
+    private function get_usd_price($listing)
+    {
+        $timestamp = strtotime($listing['tradeDT']);
+        $wemix_rate = $this->get_wemix_rate($timestamp);
+        $usd_price = $listing['price'] * $wemix_rate;
+        $usd_price = round($usd_price, 2);
+        return $usd_price;
     }
 }
