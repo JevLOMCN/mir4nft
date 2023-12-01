@@ -46,12 +46,17 @@ class StatCheckConsumer
             ) VALUES (
                 '$transportID', '$response'
             ) ON DUPLICATE KEY UPDATE `json` = '$response';";
+            $tradeType = json_decode($response, true)['data']['tradeType'] ?? null;
+            if ($tradeType !== 1) {
+                $tradeType = $this->sql->escape($tradeType) or throw new Error("failed to escape tradeType");
+                $query .= "UPDATE `sequence` SET `tradeType` = '$tradeType' WHERE `seq` = '$seq';";
+            }
         } else $query = "INSERT INTO `$stat_check` (
                 `seq`, `json`
             ) VALUES (
                 '$seq', '$response'
             ) ON DUPLICATE KEY UPDATE `json` = '$response';";
-        $this->sql->query($query) or throw new Error("failed to insert stat");
+        $this->sql->multi($query);
         $this->log->debug("inserted stats", [$query]);
         return true;
     }
