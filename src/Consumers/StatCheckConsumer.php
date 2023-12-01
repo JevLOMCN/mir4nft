@@ -3,9 +3,9 @@
 namespace RPurinton\Mir4nft\Consumers;
 
 use Bunny\{Channel, Message};
-use React\EventLoop\{LoopInterface};
+use React\EventLoop\LoopInterface;
 use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error};
-use RPurinton\Mir4nft\RabbitMQ\{Consumer};
+use RPurinton\Mir4nft\RabbitMQ\Consumer;
 
 class StatCheckConsumer
 {
@@ -16,7 +16,7 @@ class StatCheckConsumer
     public function init(): bool
     {
         $this->sql->connect() or throw new Error("failed to connect to MySQL");
-        $this->mq->connect($this->loop, "stat_checker", [$this, 'stats_callback']) or throw new Error("failed to connect to stat_check queue");
+        $this->mq->connect($this->loop, "stat_checker", $this->stats_callback(...)) or throw new Error("failed to connect to stat_check queue");
         return true;
     }
 
@@ -40,12 +40,18 @@ class StatCheckConsumer
         extract($data) or throw new Error("failed to extract data");
         $response = HTTPS::get($stat_url) or throw new Error("failed to get url");
         $response = $this->sql->escape($response) or throw new Error("failed to escape response");
-        $query = "INSERT INTO `$stat_check` (
+        if ($stat_check !== "summary") {
+            $query = "INSERT INTO `$stat_check` (
                 `transportID`, `json`
             ) VALUES (
                 '$transportID', '$response'
             ) ON DUPLICATE KEY UPDATE `json` = '$response';";
-        $this->sql->query($query) or throw new Error("failed to insert stat");
+        } else $query = "INSERT INTO `$stat_check` (
+                `seq`, `json`
+            ) VALUES (
+                '$seq', '$response'
+            ) ON DUPLICATE KEY UPDATE `json` = '$response';";
+        $this->sql->multi($query) or throw new Error("failed to insert stat");
         $this->log->debug("inserted stats", [$query]);
         return true;
     }

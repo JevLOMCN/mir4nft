@@ -5,8 +5,7 @@ namespace RPurinton\Mir4nft;
 
 use React\EventLoop\Loop;
 use RPurinton\Mir4nft\{MySQL, Error};
-use RPurinton\Mir4nft\RabbitMQ\Consumer;
-use RPurinton\Mir4nft\Consumers\StatCheckConsumer;
+use RPurinton\Mir4nft\Consumers\Bootstrapper;
 
 $worker_id = $argv[1] ?? 0;
 
@@ -33,8 +32,8 @@ try {
     exit(1);
 }
 $loop = Loop::get();
-$nlc = new StatCheckConsumer($log, new MySQL($log), $loop, new Consumer) or throw new Error("failed to create NewListingsConsumer");
-$nlc->init() or throw new Error("failed to initialize NewListingsConsumer");
+$nlc = new Bootstrapper($log, new MySQL($log), $loop) or throw new Error("failed to create Bootstrapper");
+$nlc->init() or throw new Error("failed to initialize Bootstrapper");
 $loop->addSignal(SIGINT, function () use ($loop, $log) {
     $log->info("SIGINT received, exiting...");
     $loop->stop();

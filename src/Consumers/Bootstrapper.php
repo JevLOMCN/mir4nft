@@ -6,7 +6,7 @@ use React\EventLoop\{LoopInterface, TimerInterface};
 use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error};
 use RPurinton\Mir4nft\RabbitMQ\Publisher;
 
-class NewListingsConsumer
+class Bootstrapper
 {
     private int $max_seq = 0;
     private string $base_url = "https://webapi.mir4global.com/nft/";
@@ -20,7 +20,7 @@ class NewListingsConsumer
         'powerMax' => 0,
         'priceMin' => 0,
         'priceMax' => 0,
-        'sort' => 'latest',
+        'sort' => 'oldest',
         'page' => 1,
         'languageCode' => 'en',
     ];
@@ -56,13 +56,24 @@ class NewListingsConsumer
     {
         $this->log->debug("timer fired");
         $this->update_max_seq();
-        $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
-        $this->log->debug("getting url", [$url]);
-        $response = HTTPS::get($url) or throw new Error("failed to get url");
-        $this->log->debug("received response", [$response]);
-        $data = json_decode($response, true);
-        $this->validate_data($data) or throw new Error("received invalid response");
-        $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
+
+        while (true) {
+            $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
+            $this->log->debug("getting url", [$url]);
+            $response = HTTPS::get($url) or throw new Error("failed to get url");
+            $this->log->debug("received response", [$response]);
+            $data = json_decode($response, true);
+            $this->validate_data($data) or throw new Error("received invalid response");
+            $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
+
+            // If there are more pages, increment the page number and continue the loop
+            if ($data['data']['more']) {
+                $this->http_query['page']++;
+            } else {
+                // If there are no more pages, break the loop
+                break;
+            }
+        }
     }
 
     private function validate_data($data): bool
@@ -105,29 +116,29 @@ class NewListingsConsumer
     {
         extract($this->sql->escape($listing)) or throw new Error("failed to extract escaped listing");
         $query = "INSERT INTO `transports` (
-            `transportID`, `nftID`, `sealedDT`,
-            `characterName`, `class`, `lv`, `powerScore`
-        ) VALUES (
-            '$transportID', '$nftID', '$sealedDT',
-            '$characterName', '$class', '$lv', '$powerScore'
-        ) ON DUPLICATE KEY UPDATE
-            `nftID` = '$nftID',
-            `sealedDT` = '$sealedDT',
-            `characterName` = '$characterName',
-            `class` = '$class',
-            `lv` = '$lv',
-            `powerScore` = '$powerScore';
-        INSERT INTO `sequence` (
-            `seq`, `transportID`, `price`,
-            `MirageScore`, `MiraX`, `Reinforce`
-        ) VALUES (
-            '$seq', '$transportID', '$price',
-            '$MirageScore', '$MiraX', '$Reinforce'
-        ) ON DUPLICATE KEY UPDATE
-            `price` = '$price',
-            `MirageScore` = '$MirageScore',
-            `MiraX` = '$MiraX',
-            `Reinforce` = '$Reinforce';";
+                `transportID`, `nftID`, `sealedDT`,
+                `characterName`, `class`, `lv`, `powerScore`
+            ) VALUES (
+                '$transportID', '$nftID', '$sealedDT',
+                '$characterName', '$class', '$lv', '$powerScore'
+            ) ON DUPLICATE KEY UPDATE
+                `nftID` = '$nftID',
+                `sealedDT` = '$sealedDT',
+                `characterName` = '$characterName',
+                `class` = '$class',
+                `lv` = '$lv',
+                `powerScore` = '$powerScore';
+            INSERT INTO `sequence` (
+                `seq`, `transportID`, `price`,
+                `MirageScore`, `MiraX`, `Reinforce`
+            ) VALUES (
+                '$seq', '$transportID', '$price',
+                '$MirageScore', '$MiraX', '$Reinforce'
+            ) ON DUPLICATE KEY UPDATE
+                `price` = '$price',
+                `MirageScore` = '$MirageScore',
+                `MiraX` = '$MiraX',
+                `Reinforce` = '$Reinforce';";
         $this->log->debug("inserting new listing", [$query]);
         $this->sql->multi($query);
         return [$seq, $transportID];
