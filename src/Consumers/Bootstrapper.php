@@ -38,26 +38,14 @@ class Bootstrapper
 
     public function init(): bool
     {
-        $this->timer();
-        $result = $this->loop->addPeriodicTimer(15, [$this, 'timer']) or throw new Error("failed to add periodic timer");
-        $success = $result instanceof TimerInterface;
-        if ($success) $this->log->info("periodic timer added");
-        else $this->log->error("failed to add periodic timer");
-        return $success;
+        $this->bootstrap();
+        return true;
     }
 
-    private function update_max_seq()
+    public function bootstrap(): void
     {
-        extract($this->sql->single("SELECT MAX(`seq`) as `max_seq` FROM `sequence`;")) or throw new Error("failed to get max seq");
-        $this->max_seq = $max_seq;
-    }
-
-    public function timer(): void
-    {
-        $this->log->debug("timer fired");
-        $this->update_max_seq();
-
         while (true) {
+            $this->log->info("Getting page {$this->http_query['page']} of listings");
             $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
             $this->log->debug("getting url", [$url]);
             $response = HTTPS::get($url) or throw new Error("failed to get url");
@@ -69,10 +57,7 @@ class Bootstrapper
             // If there are more pages, increment the page number and continue the loop
             if ($data['data']['more']) {
                 $this->http_query['page']++;
-            } else {
-                // If there are no more pages, break the loop
-                break;
-            }
+            } else break;
         }
     }
 
