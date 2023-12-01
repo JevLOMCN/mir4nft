@@ -253,6 +253,7 @@ class NewListingsConsumer
         $usd_price = $this->get_usd_price($listing);
         $seq = $this->sql->escape($listing['seq']);
         $query = "UPDATE `sequence` SET `tradeType` = '3', `usd_price` = '$usd_price' WHERE `seq` = '$seq';";
+        $this->sql->query($query) or throw new Error("failed to update sequence");
         return true;
     }
 
