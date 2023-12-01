@@ -2,7 +2,6 @@
 
 namespace RPurinton\Mir4nft\Consumers;
 
-use React\EventLoop\{LoopInterface, TimerInterface};
 use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error};
 use RPurinton\Mir4nft\RabbitMQ\Publisher;
 
