@@ -6,12 +6,11 @@ $db = mysqli_connect("127.0.0.1", "mir4nft", "mir4nft", "mir4nft");
 // Fetch all transportID and class from the transports table
 $result = $db->query("SELECT transportID, class FROM transports");
 while ($row = $result->fetch_assoc()) {
-    $transportID = $result['transportID'];
-    $class = $result['class'];
+    $transportID = $row['transportID'];
+    $class = $row['class'];
 
     // Build the URL for fetching the skills info
     $url = "https://webapi.mir4global.com/nft/character/skills?" . http_build_query([
-        'seq' => $transportID,
         'transportID' => $transportID,
         'class' => $class,
         'languageCode' => 'en',
