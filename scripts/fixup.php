@@ -17,8 +17,20 @@ while ($row = $result->fetch_assoc()) {
     ]);
     echo ("Fetching skills for transportID $transportID\n");
     // Fetch the skills info
-    $response = file_get_contents($url);
+    $response = geturl($url);
     $response_esc = mysqli_real_escape_string($db, $response);
     $query = "INSERT INTO `skills` (`transportID`, `json`) VALUES ('$transportID', '$response_esc') ON DUPLICATE KEY UPDATE `json` = '$response_esc'";
     $db->query($query);
+}
+
+function geturl(string $url, array $headers = []): string
+{
+    $headers[] = "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36";
+    $response = file_get_contents($url, false, stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'header' => implode("\r\n", $headers)
+        ]
+    ])) or throw new Error("failed to get contents");
+    return $response;
 }
