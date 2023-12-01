@@ -47,15 +47,15 @@ class StatCheckConsumer
                 '$transportID', '$response_escaped'
             ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';";
         } else {
-            $query = "INSERT INTO `$stat_check` (
+            $query = "INSERT INTO `summary` (
                 `seq`, `json`
             ) VALUES (
                 '$seq', '$response_escaped'
             ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';";
             $tradeType = json_decode($response, true)['data']['tradeType'] ?? null;
-            if ($tradeType !== 1) {
+            if ($tradeType === 2) {
                 $tradeType = $this->sql->escape($tradeType);
-                $query .= "UPDATE `sequence` SET `tradeType` = '$tradeType' WHERE `seq` = '$seq';";
+                $query .= "UPDATE `sequence` SET `tradeType` = '2' WHERE `seq` = '$seq';";
             }
         }
         $this->sql->multi($query);
