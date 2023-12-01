@@ -38,6 +38,7 @@ class Bootstrapper
 
     public function init(): bool
     {
+        $this->sql->connect();
         $this->bootstrap();
         return true;
     }
