@@ -30,13 +30,6 @@ try {
     echo ("Fatal Error " . $e->getMessage() . "\n");
     exit(1);
 }
-$nlc = new Bootstrapper($log, new MySQL($log)) or throw new Error("failed to create Bootstrapper");
-$nlc->init() or throw new Error("failed to initialize Bootstrapper");
-$loop->addSignal(SIGINT, function () use ($loop, $log) {
-    $log->info("SIGINT received, exiting...");
-    $loop->stop();
-});
-$loop->addSignal(SIGTERM, function () use ($loop, $log) {
-    $log->info("SIGTERM received, exiting...");
-    $loop->stop();
-});
+
+$bs = new Bootstrapper($log, new MySQL($log)) or throw new Error("failed to create Bootstrapper");
+$bs->init() or throw new Error("failed to initialize Bootstrapper");

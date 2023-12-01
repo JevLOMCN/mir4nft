@@ -30,13 +30,6 @@ try {
     echo ("Fatal Error " . $e->getMessage() . "\n");
     exit(1);
 }
-$nlc = new StatusUpdater($log, new MySQL($log)) or throw new Error("failed to create StatusUpdater");
-$nlc->init() or throw new Error("failed to initialize StatusUpdater");
-$loop->addSignal(SIGINT, function () use ($loop, $log) {
-    $log->info("SIGINT received, exiting...");
-    $loop->stop();
-});
-$loop->addSignal(SIGTERM, function () use ($loop, $log) {
-    $log->info("SIGTERM received, exiting...");
-    $loop->stop();
-});
+
+$su = new StatusUpdater($log, new MySQL($log)) or throw new Error("failed to create StatusUpdater");
+$su->init() or throw new Error("failed to initialize StatusUpdater");
