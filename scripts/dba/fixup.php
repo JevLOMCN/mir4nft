@@ -1,5 +1,8 @@
 <?php
 
+// Example when we needed to fix the skills table.
+// Can be used as a template for future DB fixes.
+
 // Database connection
 $db = mysqli_connect("127.0.0.1", "mir4nft", "mir4nft", "mir4nft");
 
