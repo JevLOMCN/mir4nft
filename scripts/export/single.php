@@ -41,7 +41,6 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
     INNER JOIN `training` ON `sequence`.`transportID` = `training`.`transportID`
     WHERE `sequence`.`seq` = $seq");
 while ($row = $result->fetch_assoc()) {
-    $usd_price = "$" . number_format($row['usd_price'], 2, ".", ",");
     $record = [];
 
     // summary

@@ -37,7 +37,7 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
     WHERE `sequence`.`usd_price` IS NOT NULL
     ORDER BY `sequence`.`seq` ASC");
 while ($row = $result->fetch_assoc()) {
-    $usd_price = "$" . number_format($row['usd_price'], 2, ".", ",");
+    $usd_price = $row['usd_price'];
     $record = [];
 
     // summary
@@ -163,11 +163,10 @@ while ($row = $result->fetch_assoc()) {
     $messages = [];
     $messages[] = ["role" => "system", "content" => "You are the Mir4info.com NFT Valuator"];
     $messages[] = ["role" => "user", "content" => json_encode($record)];
-    $messages[] = ["role" => "assistant", "content" => "Sale Price $usd_price"];
+    $messages[] = ["role" => "assistant", "content" => json_encode(["usd_price" => $usd_price])];
     $messages2 = [];
     $messages2["messages"] = $messages;
-    $json_string = json_encode($messages2);
-    file_put_contents("data.jsonl", $json_string . "\n", FILE_APPEND);
+    file_put_contents("data.jsonl", json_encode($messages2) . "\n", FILE_APPEND);
 }
 
 function getGrade($grade)
