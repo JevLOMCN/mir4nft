@@ -67,9 +67,11 @@ while ($row = $result->fetch_assoc()) {
             'refineStep' => $equipItem['refineStep'],
         ];
     }
+    $messages = [];
     $messages[] = ["role" => "system", "content" => "You are the Mir4info NFT Valuation Tool."];
     $messages[] = ["role" => "user", "content" => json_encode($record)];
     $messages[] = ["role" => "assistant", "content" => "Sale Price $usd_price"];
+    $messages2 = [];
     $messages2["messages"] = $messages;
     $json_string = json_encode($messages2);
     file_put_contents("data.jsonl", $json_string . "\n", FILE_APPEND);
