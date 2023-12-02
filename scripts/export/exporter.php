@@ -20,7 +20,7 @@ $result = $db->query("SELECT
 `skills`.`json` AS `skills`,
 `stats`.`json` AS `stats`,
 `training`.`json` AS `training`
-FROM `sequence`,
+FROM `sequence`
 INNER JOIN `transports` ON `sequence`.`transportID` = `transports`.`transportID`
 INNER JOIN `summary` ON `sequence`.`seq` = `summary`.`seq`
 INNER JOIN `assets` ON `sequence`.`transportID` = `assets`.`transportID`
