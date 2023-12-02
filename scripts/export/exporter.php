@@ -60,7 +60,7 @@ while ($row = $result->fetch_assoc()) {
     $summary = json_decode($row['summary'], true);
     foreach ($summary['data']['equipItem'] as $equipItem) {
         $record['equipItem'][] = [
-            'name' => $equipItem['name'],
+            'name' => $equipItem['itemName'],
             'grade' => getGrade($equipItem['grade']),
             'tier' => $equipItem['tier'],
             'enhance' => $equipItem['enhance'],
