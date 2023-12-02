@@ -42,7 +42,7 @@ while ($row = $result->fetch_assoc()) {
     $summary = json_decode($row['summary'], true);
     // transport parts
     $record['class'] = getClass($summary['data']['character']['class']);
-    $record['lv'] = $summary['data']['character']['lv'];
+    $record['level'] = $summary['data']['character']['level'];
     $record['powerScore'] = $summary['data']['character']['powerScore'];
     foreach ($summary['data']['equipItem'] as $equipItem) {
         $record['equipItems'][] = [
