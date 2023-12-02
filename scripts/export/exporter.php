@@ -93,7 +93,7 @@ while ($row = $result->fetch_assoc()) {
             $item['enhance'] = $invenItem['enhance'];
             $item['refine'] = $invenItem['RefineStep'];
             $item['trance'] = $invenItem['tranceStep'];
-            $item['tradeable'] = tradeable($invenItem['itemID']);
+            $item['trade'] = tradeable($invenItem['itemID']);
             $record['inventory'][] = $item;
         }
     }

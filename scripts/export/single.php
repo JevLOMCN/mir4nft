@@ -90,14 +90,14 @@ while ($row = $result->fetch_assoc()) {
     foreach ($inven as $invenItem) {
         if ($invenItem['grade'] == '5') {
             $item = [];
-            $item['qty'] = $invenItem['stack'];
+            $item['qty'] = max($invenItem['stack'], 1);
             $item['name'] = $invenItem['itemName'];
             $item['grade'] = getGrade($invenItem['grade']);
             $item['tier'] = $invenItem['tier'];
             $item['enhance'] = $invenItem['enhance'];
             $item['refine'] = $invenItem['RefineStep'];
             $item['trance'] = $invenItem['tranceStep'];
-            $item['tradeable'] = tradeable($invenItem['itemID']);
+            $item['trade'] = tradeable($invenItem['itemID']);
             $record['inventory'][] = $item;
         }
     }
