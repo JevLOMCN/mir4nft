@@ -52,7 +52,7 @@ while ($row = $result->fetch_assoc()) {
             'grade' => getGrade($equipItem['grade']),
             'tier' => $equipItem['tier'],
             'enhance' => $equipItem['enhance'],
-            'refineStep' => $equipItem['refineStep'],
+            'refine' => $equipItem['refineStep'],
         ];
     }
 
@@ -84,8 +84,7 @@ while ($row = $result->fetch_assoc()) {
     // inven
     $inven = json_decode($row['inven'], true)['data'];
     foreach ($inven as $invenItem) {
-        $grade = $invenItem['grade'];
-        if ($grade == 5) {
+        if ($invenItem['grade'] == '5') {
             $item = [];
             $item['qty'] = $invenItem['stack'];
             $item['name'] = $invenItem['itemName'];
@@ -95,6 +94,7 @@ while ($row = $result->fetch_assoc()) {
             $item['refine'] = $invenItem['RefineStep'];
             $item['trance'] = $invenItem['tranceStep'];
             $item['tradeable'] = tradeable($invenItem['itemID']);
+            $record['inventory'][] = $item;
         }
     }
 
@@ -172,6 +172,7 @@ while ($row = $result->fetch_assoc()) {
 
 function getGrade($grade)
 {
+    $grade = strval($grade);
     return match ($grade) {
         "1" => "Common",
         "2" => "Uncommon",
@@ -184,6 +185,7 @@ function getGrade($grade)
 
 function getClass($class)
 {
+    $class = strval($class);
     return match ($class) {
         "1" => "Warrior",
         "2" => "Sorcerer",
