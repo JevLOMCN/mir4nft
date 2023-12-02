@@ -14,10 +14,10 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
         `holystuff`.`json` AS `holystuff`,
         `inven`.`json` AS `inven`,
         `magicorb`.`json` AS `magicorb`,
-        `magicstone`.`json` AS `magicstone`,
         `mysticalpiece`.`json` AS `mysticalpiece`,
         `potential`.`json` AS `potential`,
         `skills`.`json` AS `skills`,
+        `spirit`.`json` AS `spirit`,
         `stats`.`json` AS `stats`,
         `training`.`json` AS `training`
     FROM `sequence`
@@ -28,10 +28,10 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
     INNER JOIN `holystuff` ON `sequence`.`transportID` = `holystuff`.`transportID`
     INNER JOIN `inven` ON `sequence`.`transportID` = `inven`.`transportID`
     INNER JOIN `magicorb` ON `sequence`.`transportID` = `magicorb`.`transportID`
-    INNER JOIN `magicstone` ON `sequence`.`transportID` = `magicstone`.`transportID`
     INNER JOIN `mysticalpiece` ON `sequence`.`transportID` = `mysticalpiece`.`transportID`
     INNER JOIN `potential` ON `sequence`.`transportID` = `potential`.`transportID`
     INNER JOIN `skills` ON `sequence`.`transportID` = `skills`.`transportID`
+    INNER JOIN `spirit` ON `sequence`.`transportID` = `spirit`.`transportID`
     INNER JOIN `stats` ON `sequence`.`transportID` = `stats`.`transportID`
     INNER JOIN `training` ON `sequence`.`transportID` = `training`.`transportID`
     WHERE `sequence`.`usd_price` IS NOT NULL
@@ -41,9 +41,9 @@ while ($row = $result->fetch_assoc()) {
     $record = [];
 
     // summary
-    $summary = json_decode($row['summary'], true);
+    $summary = json_decode($row['summary'], true)['data'];
     // transport parts
-    $record['class'] = getClass($summary['data']['character']['class']);
+    $record['class'] = getClass($summary['character']['class']);
     $record['level'] = $summary['data']['character']['level'];
     $record['powerScore'] = $summary['data']['character']['powerScore'];
     foreach ($summary['data']['equipItem'] as $equipItem) {
@@ -55,6 +55,111 @@ while ($row = $result->fetch_assoc()) {
             'refineStep' => $equipItem['refineStep'],
         ];
     }
+
+    // assets
+    $record['assets'] = json_decode($row['assets'], true)['data'];
+
+    // building
+    $buildings = json_decode($row['building'], true)['data'];
+    foreach ($buildings as $building) {
+        $buildingName = $building['buildingName'];
+        $record['conquests'][$buildingName] = $building['buildingLevel'];
+    }
+
+    // codex
+    $codex = json_decode($row['codex'], true)['data'];
+    foreach ($codex as $codexItem) {
+        $codexName = $codexItem['codexName'];
+        unset($codexItem['codexName']);
+        $record['codex'][$codexName] = $codexItem;
+    }
+
+    // holystuff
+    $holystuff = json_decode($row['holystuff'], true)['data'];
+    foreach ($holystuff as $holystuffItem) {
+        $holystuffName = $holystuffItem['HolyStuffName'];
+        $record['holystuff'][$holystuffName] = $holystuffItem['Grade'];
+    }
+
+    // inven
+    $inven = json_decode($row['inven'], true)['data'];
+    foreach ($inven as $invenItem) {
+        $grade = $invenItem['grade'];
+        if ($grade == 5) {
+            $item = [];
+            $item['qty'] = $invenItem['stack'];
+            $item['name'] = $invenItem['itemName'];
+            $item['grade'] = getGrade($invenItem['grade']);
+            $item['tier'] = $invenItem['tier'];
+            $item['enhance'] = $invenItem['enhance'];
+            $item['refine'] = $invenItem['RefineStep'];
+            $item['trance'] = $invenItem['tranceStep'];
+            $item['tradeable'] = tradeable($invenItem['itemID']);
+        }
+    }
+
+    // magicorb
+    $magicorb = json_decode($row['magicorb'], true)['data']['equipItem'];
+    foreach ($magicorb as $deck) {
+        foreach ($deck as $item) {
+            $record['magicorbs'][$item['itemName']] = [
+                'grade' => getGrade($item['grade']),
+                'level' => $item['itemLv'],
+                'exp' => $item['itemExp'],
+                'tier' => $item['tier'],
+            ];
+        }
+    }
+
+    // mysticalpiece
+    $mysticalpiece = json_decode($row['mysticalpiece'], true)['data']['equipItem'];
+    foreach ($mysticalpiece as $deck) {
+        foreach ($deck as $item) {
+            if ($item['grade'] >= 4) $record['mysticalpieces'][$item['itemName']] = [
+                'grade' => getGrade($item['grade']),
+                'tier' => $item['tier']
+            ];
+        }
+    }
+
+    // potential
+    $record['potential'] = json_decode($row['potential'], true)['data'];
+
+    // skills
+    $skills = json_decode($row['skills'], true)['data'];
+    foreach ($skills as $skill) {
+        $record['skills'][$skill['skillName']] = $skill['skillLevel'];
+    }
+
+    // spirit
+    $spirit = json_decode($row['spirit'], true)['data']['inven'];
+    foreach ($spirit as $spiritItem) {
+        if ($spiritItem['grade'] >= 4) $record['spirits'][] = [
+            'name' => $spiritItem['petName'],
+            'grade' => getGrade($spiritItem['grade']),
+            'transend' => $spiritItem['transcend']
+        ];
+    }
+
+    // stats
+    $stats = json_decode($row['stats'], true)['data']['lists'];
+    foreach ($stats as $stat) {
+        $record['stats'][$stat['statName']] = $stat['statValue'];
+    }
+
+    // training
+    $training = json_decode($row['training'], true)['data'];
+    $record['training']['Constitution'] = $training['constitutionLevel'];
+    $record['training']['Solitude'] = $training['collectLevel'];
+    unset($training['constitutionLevel']);
+    unset($training['collectLevel']);
+    unset($training['constitutionName']);
+    unset($training['collectName']);
+    foreach ($training as $trainingItem) {
+        $record['training'][$trainingItem['forceName']] = $trainingItem['forceLevel'];
+    }
+
+    // Write to file
     $messages = [];
     $messages[] = ["role" => "system", "content" => "You are the Mir4info.com NFT Valuator"];
     $messages[] = ["role" => "user", "content" => json_encode($record)];
@@ -87,5 +192,13 @@ function getClass($class)
         "5" => "Lancer",
         "6" => "Darkist",
         default => "Warrior"
+    };
+}
+
+function tradeable($itemID)
+{
+    return match (substr($itemID, 3, 1)) {
+        "1" => "yes",
+        default => "no"
     };
 }
