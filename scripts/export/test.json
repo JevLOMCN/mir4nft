@@ -1,0 +1,175 @@
+{
+    "code": 200,
+    "data": {
+        "character": {
+            "name": "Guxtavera",
+            "worldName": "EU022",
+            "transportID": "248439",
+            "class": "2",
+            "level": "122",
+            "powerScore": "189142",
+            "MirageScore": "323150",
+            "MiraX": "1613",
+            "Reinforce": "0"
+        },
+        "mintedTS": 1646914836,
+        "sealedTS": 1646914836,
+        "nftID": "20588",
+        "blockChain": "WEMIX",
+        "price": 95,
+        "tradeType": 2,
+        "contractAddress": "0xc234e58cb077ccf4fbe57d3ac27db0d1cdfe0473",
+        "equipItem": {
+            "1": {
+                "itemIdx": "200202018",
+                "enhance": "7",
+                "refineStep": "0",
+                "grade": "4",
+                "tier": "1",
+                "itemType": "2_2",
+                "itemName": "Green Jade Twin Dragons Staff",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Pcm_01\/Icon_WPN_PCM_05.png"
+            },
+            "2": {
+                "itemIdx": "401201020",
+                "enhance": "7",
+                "refineStep": "0",
+                "grade": "4",
+                "tier": "2",
+                "itemType": "4_1",
+                "itemName": "Vast Heaven Necklace",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Accessory_01\/Pcc_Accessory_Necklace_003.png"
+            },
+            "3": {
+                "itemIdx": "402201020",
+                "enhance": "6",
+                "refineStep": "0",
+                "grade": "4",
+                "tier": "2",
+                "itemType": "4_2",
+                "itemName": "Vast Heaven Bracelet",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Accessory_01\/Pcc_Accessory_Bracelet_003.png"
+            },
+            "4": {
+                "itemIdx": "403201020",
+                "enhance": "7",
+                "refineStep": "0",
+                "grade": "4",
+                "tier": "2",
+                "itemType": "4_3",
+                "itemName": "Vast Heaven Ring",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Accessory_01\/Pcc_Accessory_Ring_003.png"
+            },
+            "5": {
+                "itemIdx": "301202020",
+                "enhance": "6",
+                "refineStep": "0",
+                "grade": "4",
+                "tier": "2",
+                "itemType": "3_1",
+                "itemName": "Soul Subjugator Uniform",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Pcm_01\/PCM_Armor_05_Top.png"
+            },
+            "6": {
+                "itemIdx": "302202018",
+                "enhance": "6",
+                "refineStep": "0",
+                "grade": "4",
+                "tier": "1",
+                "itemType": "3_2",
+                "itemName": "Ultimate Mana Outfit",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Pcm_01\/PCM_Armor_05_Pants.png"
+            },
+            "7": {
+                "itemIdx": "303202020",
+                "enhance": "6",
+                "refineStep": "0",
+                "grade": "4",
+                "tier": "2",
+                "itemType": "3_3",
+                "itemName": "Soul Subjugator Gloves",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Pcm_01\/PCM_Armor_05_Gloves.png"
+            },
+            "8": {
+                "itemIdx": "304202018",
+                "enhance": "7",
+                "refineStep": "0",
+                "grade": "4",
+                "tier": "1",
+                "itemType": "3_4",
+                "itemName": "Ultimate Mana Boots",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Pcm_01\/PCM_Armor_05_Shose.png"
+            },
+            "9": {
+                "itemIdx": "201202015",
+                "enhance": "6",
+                "refineStep": "0",
+                "grade": "3",
+                "tier": "4",
+                "itemType": "20_1",
+                "itemName": "Dragon and Phoenix Adamant Fan",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Pcm_01\/PCM_SubWeapon_04.png"
+            },
+            "10": {
+                "itemIdx": "404201015",
+                "enhance": "6",
+                "refineStep": "0",
+                "grade": "3",
+                "tier": "4",
+                "itemType": "4_4",
+                "itemName": "Moonfang Earrings",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_Accessory_01\/Pcc_Accessory_EarRing_004.png"
+            },
+            "11": {
+                "itemIdx": "221200001",
+                "enhance": "1",
+                "refineStep": "0",
+                "grade": "3",
+                "tier": "1",
+                "itemType": "22_1",
+                "itemName": "[R] Blue Dragon Majestic Scepter",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_DragonicGear_01\/Pcc_DragonicGear_Scepter_001.png"
+            },
+            "12": {
+                "itemIdx": "222200001",
+                "enhance": "0",
+                "refineStep": "0",
+                "grade": "3",
+                "tier": "1",
+                "itemType": "22_2",
+                "itemName": "[R] Blue Dragon Majestic Cape",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_DragonicGear_01\/Pcc_DragonicGear_Cape_001.png"
+            },
+            "13": {
+                "itemIdx": "223200001",
+                "enhance": "0",
+                "refineStep": "0",
+                "grade": "3",
+                "tier": "1",
+                "itemType": "22_3",
+                "itemName": "[R] Blue Dragon Majestic Crown",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_DragonicGear_01\/Pcc_DragonicGear_Crown_001.png"
+            },
+            "14": {
+                "itemIdx": "224200001",
+                "enhance": "0",
+                "refineStep": "0",
+                "grade": "3",
+                "tier": "1",
+                "itemType": "22_4",
+                "itemName": "[R] Blue Dragon Majestic Seal",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_DragonicGear_01\/Pcc_DragonicGear_Seal_001.png"
+            },
+            "15": {
+                "itemIdx": "225200001",
+                "enhance": "0",
+                "refineStep": "0",
+                "grade": "3",
+                "tier": "1",
+                "itemType": "22_5",
+                "itemName": "[R] Blue Dragon Majestic Tome",
+                "itemPath": "https:\/\/file.mir4global.com\/xdraco-thumb\/Content\/UI\/Atlas_N_Resource\/Icon\/Item\/Equip\/Item_Equip_DragonicGear_01\/Pcc_DragonicGear_Book_001.png"
+            }
+        }
+    }
+}
