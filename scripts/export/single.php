@@ -1,11 +1,11 @@
 <?php
 
 if (!isset($argv[1])) {
-    echo "Usage: php single.php <transportID>\n";
+    echo "Usage: php single.php <seq>\n";
     exit;
 }
 
-$transportID = $argv[1];
+$seq = $argv[1];
 
 // Database connection
 $db = mysqli_connect("127.0.0.1", "mir4nft", "mir4nft", "mir4nft");
@@ -39,9 +39,7 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
     INNER JOIN `spirit` ON `sequence`.`transportID` = `spirit`.`transportID`
     INNER JOIN `stats` ON `sequence`.`transportID` = `stats`.`transportID`
     INNER JOIN `training` ON `sequence`.`transportID` = `training`.`transportID`
-    WHERE `sequence`.`transportID` = '$transportID'
-    ORDER BY `sequence`.`seq` DESC
-    LIMIT 1");
+    WHERE `sequence`.`seq` = $seq");
 while ($row = $result->fetch_assoc()) {
     $usd_price = "$" . number_format($row['usd_price'], 2, ".", ",");
     $record = [];
