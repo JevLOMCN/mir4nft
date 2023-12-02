@@ -44,9 +44,9 @@ while ($row = $result->fetch_assoc()) {
     $summary = json_decode($row['summary'], true)['data'];
     // transport parts
     $record['class'] = getClass($summary['character']['class']);
-    $record['level'] = $summary['data']['character']['level'];
-    $record['powerScore'] = $summary['data']['character']['powerScore'];
-    foreach ($summary['data']['equipItem'] as $equipItem) {
+    $record['level'] = $summary['character']['level'];
+    $record['powerScore'] = $summary['character']['powerScore'];
+    foreach ($summary['equipItem'] as $equipItem) {
         $record['equipItems'][] = [
             'name' => $equipItem['itemName'],
             'grade' => getGrade($equipItem['grade']),
@@ -149,9 +149,9 @@ while ($row = $result->fetch_assoc()) {
 
     // training
     $training = json_decode($row['training'], true)['data'];
-    $record['training']['Constitution'] = $training['constitutionLevel'];
+    $record['training']['Constitution'] = $training['consitutionLevel'];
     $record['training']['Solitude'] = $training['collectLevel'];
-    unset($training['constitutionLevel']);
+    unset($training['consitutionLevel']);
     unset($training['collectLevel']);
     unset($training['constitutionName']);
     unset($training['collectName']);
