@@ -56,7 +56,7 @@ while ($row = $result->fetch_assoc()) {
         ];
     }
     $messages = [];
-    $messages[] = ["role" => "system", "content" => "You are the Mir4info NFT Valuation Tool."];
+    $messages[] = ["role" => "system", "content" => "You are the Mir4info.com NFT Valuator"];
     $messages[] = ["role" => "user", "content" => json_encode($record)];
     $messages[] = ["role" => "assistant", "content" => "Sale Price $usd_price"];
     $messages2 = [];
