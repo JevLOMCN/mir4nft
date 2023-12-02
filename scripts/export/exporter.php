@@ -153,7 +153,7 @@ while ($row = $result->fetch_assoc()) {
     $record['training']['Solitude'] = $training['collectLevel'];
     unset($training['consitutionLevel']);
     unset($training['collectLevel']);
-    unset($training['constitutionName']);
+    unset($training['consitutionName']);
     unset($training['collectName']);
     foreach ($training as $trainingItem) {
         $record['training'][$trainingItem['forceName']] = $trainingItem['forceLevel'];
