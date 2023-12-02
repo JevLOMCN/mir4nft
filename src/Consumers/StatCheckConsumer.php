@@ -53,7 +53,7 @@ class StatCheckConsumer
                 '$seq', '$response_escaped'
             ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';";
             $tradeType = json_decode($response, true)['data']['tradeType'] ?? null;
-            if ($tradeType === 2) {
+            if ($tradeType !== 1) {
                 $tradeType = $this->sql->escape($tradeType);
                 $query .= "UPDATE `sequence` SET `tradeType` = '2' WHERE `seq` = '$seq';";
             }
