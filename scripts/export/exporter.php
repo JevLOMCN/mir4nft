@@ -149,8 +149,8 @@ while ($row = $result->fetch_assoc()) {
 
     // training
     $training = json_decode($row['training'], true)['data'];
-    $record['training']['Constitution'] = $training['consitutionLevel'];
-    $record['training']['Solitude'] = $training['collectLevel'];
+    $record['training']['Constitution'] = $training['consitutionLevel'] ?? "Unknown";
+    $record['training']['Solitude'] = $training['collectLevel'] ?? "Unknown";
     unset($training['consitutionLevel']);
     unset($training['collectLevel']);
     unset($training['consitutionName']);
