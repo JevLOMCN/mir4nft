@@ -1,5 +1,7 @@
 <?php
 
+@unlink("data.jsonl");
+
 // Database connection
 $db = mysqli_connect("127.0.0.1", "mir4nft", "mir4nft", "mir4nft");
 
