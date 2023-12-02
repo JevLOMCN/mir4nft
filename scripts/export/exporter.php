@@ -44,15 +44,7 @@ while ($row = $result->fetch_assoc()) {
     $record = [];
 
     // transport parts
-    $record['class'] = match ($row['class']) {
-        1 => "Warrior",
-        2 => "Sorcerer",
-        3 => "Taoist",
-        4 => "Arbalist",
-        5 => "Lancer",
-        6 => "Darkist",
-        default => "Warrior"
-    };
+    $record['class'] = getClass($row['class']);
     $record['lv'] = $row['lv'];
     $record['powerScore'] = $row['powerScore'];
 
@@ -86,5 +78,18 @@ function getGrade($grade)
         4 => "Epic",
         5 => "Legendary",
         default => "Common"
+    };
+}
+
+function getClass($class)
+{
+    return match ($class) {
+        1 => "Warrior",
+        2 => "Sorcerer",
+        3 => "Taoist",
+        4 => "Arbalist",
+        5 => "Lancer",
+        6 => "Darkist",
+        default => "Warrior"
     };
 }
