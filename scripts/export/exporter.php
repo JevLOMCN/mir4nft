@@ -86,7 +86,7 @@ while ($row = $result->fetch_assoc()) {
     foreach ($inven as $invenItem) {
         if ($invenItem['grade'] == '5') {
             $item = [];
-            $item['qty'] = $invenItem['stack'];
+            $item['qty'] = max($invenItem['stack'], 1);
             $item['name'] = $invenItem['itemName'];
             $item['grade'] = getGrade($invenItem['grade']);
             $item['tier'] = $invenItem['tier'];
