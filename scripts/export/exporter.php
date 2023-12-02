@@ -6,9 +6,9 @@ $db = mysqli_connect("127.0.0.1", "mir4nft", "mir4nft", "mir4nft");
 // Fetch all transportID and class from the transports table
 $result = $db->query("SELECT
 `sequence`.`usd_price`,
-`transports`.`class`,
-`transports`.`lv`,
-`transports`.`powerScore`,
+`transports`.`class` AS `class`,
+`transports`.`lv` AS `lv`,
+`transports`.`powerScore` AS `powerScore`,
 `summary`.`json` AS `summary`,
 `assets`.`json` AS `assets`,
 `building`.`json` AS `building`,
