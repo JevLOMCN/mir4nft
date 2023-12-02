@@ -38,7 +38,7 @@ INNER JOIN `skills` ON `sequence`.`transportID` = `skills`.`transportID`
 INNER JOIN `stats` ON `sequence`.`transportID` = `stats`.`transportID`
 INNER JOIN `training` ON `sequence`.`transportID` = `training`.`transportID`
 WHERE `sequence`.`usd_price` IS NOT NULL
-ORDER BY `seq` ASC");
+ORDER BY `sequence`.`seq` ASC");
 while ($row = $result->fetch_assoc()) {
     $usd_price = "$" . number_format($row['usd_price'], 2, ".", ",");
     $record = [];
