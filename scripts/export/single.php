@@ -49,15 +49,12 @@ while ($row = $result->fetch_assoc()) {
     $record['class'] = getClass($summary['character']['class']);
     $record['level'] = $summary['character']['level'];
     $record['powerScore'] = $summary['character']['powerScore'];
-    foreach ($summary['equipItem'] as $equipItem) {
-        $record['equipItems'][] = [
-            'name' => $equipItem['itemName'],
-            'grade' => getGrade($equipItem['grade']),
-            'tier' => $equipItem['tier'],
-            'enhance' => $equipItem['enhance'],
-            'refineStep' => $equipItem['refineStep'],
-        ];
-    }
+    foreach ($summary['equipItem'] as $equipItem) $record['equipItems'][] = [
+        'name' => $equipItem['itemName'],
+        'grade' => getGrade($equipItem['grade']),
+        'tier' => $equipItem['tier'],
+        'enhance' => $equipItem['enhance'],
+    ];
 
     // assets
     $record['assets'] = json_decode($row['assets'], true)['data'];
@@ -84,45 +81,22 @@ while ($row = $result->fetch_assoc()) {
         $record['holystuff'][$holystuffName] = $holystuffItem['Grade'];
     }
 
-    // inven
-    $inven = json_decode($row['inven'], true)['data'];
-    foreach ($inven as $invenItem) {
-        if ($invenItem['grade'] == '5') {
-            $item = [];
-            $item['qty'] = max($invenItem['stack'], 1);
-            $item['name'] = $invenItem['itemName'];
-            $item['grade'] = getGrade($invenItem['grade']);
-            $item['tier'] = $invenItem['tier'];
-            $item['enhance'] = $invenItem['enhance'];
-            $item['refine'] = $invenItem['RefineStep'];
-            $item['trance'] = $invenItem['tranceStep'];
-            $item['trade'] = tradeable($invenItem['itemID']);
-            $record['inventory'][] = $item;
-        }
-    }
-
     // magicorb
     $magicorb = json_decode($row['magicorb'], true)['data']['equipItem'];
-    foreach ($magicorb as $deck) {
-        foreach ($deck as $item) {
-            $record['magicorbs'][$item['itemName']] = [
-                'grade' => getGrade($item['grade']),
-                'level' => $item['itemLv'],
-                'exp' => $item['itemExp'],
-                'tier' => $item['tier'],
-            ];
-        }
-    }
+    foreach ($magicorb as $deck) foreach ($deck as $item) $record['magicorbs'][$item['itemName']] = [
+        'grade' => getGrade($item['grade']),
+        'level' => $item['itemLv'],
+        'exp' => $item['itemExp'],
+        'tier' => $item['tier'],
+    ];
 
     // mysticalpiece
     $mysticalpiece = json_decode($row['mysticalpiece'], true)['data']['equipItem'];
-    foreach ($mysticalpiece as $deck) {
-        foreach ($deck as $item) {
-            if ($item['grade'] >= 4) $record['mysticalpieces'][$item['itemName']] = [
-                'grade' => getGrade($item['grade']),
-                'tier' => $item['tier']
-            ];
-        }
+    foreach ($mysticalpiece as $deck) foreach ($deck as $item) {
+        if ($item['grade'] >= 4) $record['mysticalpieces'][$item['itemName']] = [
+            'grade' => getGrade($item['grade']),
+            'tier' => $item['tier']
+        ];
     }
 
     // potential
@@ -146,9 +120,9 @@ while ($row = $result->fetch_assoc()) {
 
     // stats
     $stats = json_decode($row['stats'], true)['data']['lists'];
-    foreach ($stats as $stat) {
-        $record['stats'][$stat['statName']] = $stat['statValue'];
-    }
+    $stats_wanted = ["HP", "MP", "PHYS ATK", "PHYS DEF", "Spell ATK", "Spell DEF", "Accuracy", "EVA", "CRIT", "CRIT EVA"];
+    foreach ($stats as $stat) if (in_array($stat['statName'], $stats_wanted)) $record['stats'][$stat['statName']] = $stat['statValue'];
+
 
     // training
     $training = json_decode($row['training'], true)['data'];
@@ -158,9 +132,7 @@ while ($row = $result->fetch_assoc()) {
     unset($training['collectLevel']);
     unset($training['consitutionName']);
     unset($training['collectName']);
-    foreach ($training as $trainingItem) {
-        $record['training'][$trainingItem['forceName']] = $trainingItem['forceLevel'];
-    }
+    foreach ($training as $trainingItem) $record['training'][$trainingItem['forceName']] = $trainingItem['forceLevel'];
 
     echo (json_encode($record) . "\n");
 }

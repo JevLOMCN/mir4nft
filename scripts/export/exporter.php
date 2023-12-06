@@ -46,14 +46,12 @@ while ($row = $result->fetch_assoc()) {
     $record['class'] = getClass($summary['character']['class']);
     $record['level'] = $summary['character']['level'];
     $record['powerScore'] = $summary['character']['powerScore'];
-    foreach ($summary['equipItem'] as $equipItem) {
-        $record['equipItems'][] = [
-            'name' => $equipItem['itemName'],
-            'grade' => getGrade($equipItem['grade']),
-            'tier' => $equipItem['tier'],
-            'enhance' => $equipItem['enhance'],
-        ];
-    }
+    foreach ($summary['equipItem'] as $equipItem) $record['equipItems'][] = [
+        'name' => $equipItem['itemName'],
+        'grade' => getGrade($equipItem['grade']),
+        'tier' => $equipItem['tier'],
+        'enhance' => $equipItem['enhance'],
+    ];
 
     // assets
     $record['assets'] = json_decode($row['assets'], true)['data'];
@@ -82,16 +80,13 @@ while ($row = $result->fetch_assoc()) {
 
     // magicorb
     $magicorb = json_decode($row['magicorb'], true)['data']['equipItem'];
-    foreach ($magicorb as $deck) {
-        foreach ($deck as $item) {
-            $record['magicorbs'][$item['itemName']] = [
-                'grade' => getGrade($item['grade']),
-                'level' => $item['itemLv'],
-                'exp' => $item['itemExp'],
-                'tier' => $item['tier'],
-            ];
-        }
-    }
+    foreach ($magicorb as $deck) foreach ($deck as $item) $record['magicorbs'][$item['itemName']] = [
+        'grade' => getGrade($item['grade']),
+        'level' => $item['itemLv'],
+        'exp' => $item['itemExp'],
+        'tier' => $item['tier'],
+    ];
+
 
     // mysticalpiece
     $mysticalpiece = json_decode($row['mysticalpiece'], true)['data']['equipItem'];
