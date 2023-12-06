@@ -52,7 +52,6 @@ while ($row = $result->fetch_assoc()) {
             'grade' => getGrade($equipItem['grade']),
             'tier' => $equipItem['tier'],
             'enhance' => $equipItem['enhance'],
-            'refine' => $equipItem['refineStep'],
         ];
     }
 
@@ -79,23 +78,6 @@ while ($row = $result->fetch_assoc()) {
     foreach ($holystuff as $holystuffItem) {
         $holystuffName = $holystuffItem['HolyStuffName'];
         $record['holystuff'][$holystuffName] = $holystuffItem['Grade'];
-    }
-
-    // inven
-    $inven = json_decode($row['inven'], true)['data'];
-    foreach ($inven as $invenItem) {
-        if ($invenItem['grade'] == '5') {
-            $item = [];
-            $item['qty'] = max($invenItem['stack'], 1);
-            $item['name'] = $invenItem['itemName'];
-            $item['grade'] = getGrade($invenItem['grade']);
-            $item['tier'] = $invenItem['tier'];
-            $item['enhance'] = $invenItem['enhance'];
-            $item['refine'] = $invenItem['RefineStep'];
-            $item['trance'] = $invenItem['tranceStep'];
-            $item['trade'] = tradeable($invenItem['itemID']);
-            $record['inventory'][] = $item;
-        }
     }
 
     // magicorb
@@ -143,8 +125,9 @@ while ($row = $result->fetch_assoc()) {
 
     // stats
     $stats = json_decode($row['stats'], true)['data']['lists'];
+    $stats_wanted = ["HP", "MP", "PHYS ATK", "PHYS DEF", "Spell ATK", "Spell DEF"];
     foreach ($stats as $stat) {
-        $record['stats'][$stat['statName']] = $stat['statValue'];
+        if (in_array($stat['statName'], $stats_wanted)) $record['stats'][$stat['statName']] = $stat['statValue'];
     }
 
     // training
