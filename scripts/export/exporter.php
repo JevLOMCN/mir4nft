@@ -95,23 +95,20 @@ while ($row = $result->fetch_assoc()) {
 
     // mysticalpiece
     $mysticalpiece = json_decode($row['mysticalpiece'], true)['data']['equipItem'];
-    foreach ($mysticalpiece as $deck) {
-        foreach ($deck as $item) {
-            if ($item['grade'] >= 4) $record['mysticalpieces'][$item['itemName']] = [
-                'grade' => getGrade($item['grade']),
-                'tier' => $item['tier']
-            ];
-        }
+    foreach ($mysticalpiece as $deck) foreach ($deck as $item) {
+        if ($item['grade'] >= 4) $record['mysticalpieces'][$item['itemName']] = [
+            'grade' => getGrade($item['grade']),
+            'tier' => $item['tier']
+        ];
     }
+
 
     // potential
     $record['potential'] = json_decode($row['potential'], true)['data'];
 
     // skills
     $skills = json_decode($row['skills'], true)['data'];
-    foreach ($skills as $skill) {
-        $record['skills'][$skill['skillName']] = $skill['skillLevel'];
-    }
+    foreach ($skills as $skill) $record['skills'][$skill['skillName']] = $skill['skillLevel'];
 
     // spirit
     $spirit = json_decode($row['spirit'], true)['data']['inven'];
@@ -125,10 +122,8 @@ while ($row = $result->fetch_assoc()) {
 
     // stats
     $stats = json_decode($row['stats'], true)['data']['lists'];
-    $stats_wanted = ["HP", "MP", "PHYS ATK", "PHYS DEF", "Spell ATK", "Spell DEF"];
-    foreach ($stats as $stat) {
-        if (in_array($stat['statName'], $stats_wanted)) $record['stats'][$stat['statName']] = $stat['statValue'];
-    }
+    $stats_wanted = ["HP", "MP", "PHYS ATK", "PHYS DEF", "Spell ATK", "Spell DEF", "Accuracy", "EVA", "CRIT", "CRIT EVA"];
+    foreach ($stats as $stat) if (in_array($stat['statName'], $stats_wanted)) $record['stats'][$stat['statName']] = $stat['statValue'];
 
     // training
     $training = json_decode($row['training'], true)['data'];
@@ -138,9 +133,7 @@ while ($row = $result->fetch_assoc()) {
     unset($training['collectLevel']);
     unset($training['consitutionName']);
     unset($training['collectName']);
-    foreach ($training as $trainingItem) {
-        $record['training'][$trainingItem['forceName']] = $trainingItem['forceLevel'];
-    }
+    foreach ($training as $trainingItem) $record['training'][$trainingItem['forceName']] = $trainingItem['forceLevel'];
 
     // Write to file
     $messages = [];
