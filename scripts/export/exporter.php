@@ -1,5 +1,7 @@
 <?php
 
+ini_set('memory_limit', '-1');
+
 @unlink("data.jsonl");
 
 // Database connection
@@ -12,7 +14,6 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
         `building`.`json` AS `building`,
         `codex`.`json` AS `codex`,
         `holystuff`.`json` AS `holystuff`,
-        `inven`.`json` AS `inven`,
         `magicorb`.`json` AS `magicorb`,
         `mysticalpiece`.`json` AS `mysticalpiece`,
         `potential`.`json` AS `potential`,
@@ -26,7 +27,6 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
     INNER JOIN `building` ON `sequence`.`transportID` = `building`.`transportID`
     INNER JOIN `codex` ON `sequence`.`transportID` = `codex`.`transportID`
     INNER JOIN `holystuff` ON `sequence`.`transportID` = `holystuff`.`transportID`
-    INNER JOIN `inven` ON `sequence`.`transportID` = `inven`.`transportID`
     INNER JOIN `magicorb` ON `sequence`.`transportID` = `magicorb`.`transportID`
     INNER JOIN `mysticalpiece` ON `sequence`.`transportID` = `mysticalpiece`.`transportID`
     INNER JOIN `potential` ON `sequence`.`transportID` = `potential`.`transportID`
