@@ -32,7 +32,11 @@ class StatCheckConsumer
 
     private function validate_stats_callback($data): bool
     {
-        return is_array($data) && isset($data['seq']) && isset($data['transportID']) && isset($data['stat_check']) && isset($data['stat_url']);
+        return is_array($data) &&
+            isset($data['seq']) &&
+            isset($data['transportID']) &&
+            isset($data['stat_check']) &&
+            isset($data['stat_url']);
     }
 
     private function insert_stats($data): bool
