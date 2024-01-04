@@ -2,7 +2,7 @@
 
 namespace RPurinton\Mir4nft;
 
-Composer::autoLoad(__DIR__) or throw new \Exception("composer failed to autoload");
+Composer::autoload(__DIR__) or throw new \Exception("composer failed to autoload");
 
 class Composer
 {
@@ -44,20 +44,20 @@ class Composer
     }
 
 
-    public static function requireFile(string $path)
+    public static function require(string $path)
     {
         if (!file_exists($path)) throw new \Exception("required $path not found");
         require_once($path);
     }
 
-    public static function autoLoad(string $wdir): bool
+    public static function autoload(string $wdir): bool
     {
         if (!file_exists("$wdir/vendor/autoload.php")) {
             echo ("[INFO] composer autoload not found, attempting to install...");
             self::command($wdir, 'install') or throw new \Exception("composer install failed");
             echo ("done.\n");
         }
-        self::requireFile(__DIR__ . '/vendor/autoload.php');
+        self::require(__DIR__ . '/vendor/autoload.php');
         return class_exists('\RPurinton\Mir4nft\LogFactory');
     }
 }
