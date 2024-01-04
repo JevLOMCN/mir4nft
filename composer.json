@@ -19,7 +19,7 @@
     ],
     "require": {
         "react/async": "^4.2",
-        "bunny/bunny": "@dev",
-        "monolog/monolog": "^3.5"
+        "monolog/monolog": "^3.5",
+        "discommand2/bunny": "v0.5.5.1"
     }
 }
