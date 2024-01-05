@@ -341,7 +341,7 @@ class Export
 
         foreach ($stats['lists'] as $stat) {
             if (in_array($stat['statName'], self::STATS)) {
-                $processedStats[$stat['statName']] = $stats['statValue'];
+                $processedStats[$stat['statName']] = $stat['statValue'];
             }
         }
 
