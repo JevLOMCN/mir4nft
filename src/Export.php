@@ -315,11 +315,8 @@ class Export
         $processedSpirit = [];
 
         foreach ($spirit['inven'] as $spiritItem) {
-            if ($spiritItem['grade'] >= 4) {
-                $processedSpirit[] = [
-                    'name' => $spiritItem['petName'],
-                    'grade' => $spiritItem['grade']
-                ];
+            if ($spiritItem['grade'] === 5) {
+                $processedSpirit[] = $spiritItem['petName'];
             }
         }
 
