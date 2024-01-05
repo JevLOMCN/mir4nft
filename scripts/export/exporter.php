@@ -37,7 +37,7 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
     WHERE `sequence`.`usd_price` IS NOT NULL
     ORDER BY `sequence`.`seq` ASC");
 while ($row = $result->fetch_assoc()) {
-    $usd_price = $row['usd_price'];
+    $usd_price = round($row['usd_price']);
     $record = [];
 
     // summary
@@ -111,7 +111,6 @@ while ($row = $result->fetch_assoc()) {
         if ($spiritItem['grade'] >= 4) $record['spirits'][] = [
             'name' => $spiritItem['petName'],
             'grade' => getGrade($spiritItem['grade']),
-            'transend' => $spiritItem['transcend']
         ];
     }
 
@@ -131,25 +130,23 @@ while ($row = $result->fetch_assoc()) {
     foreach ($training as $trainingItem) $record['training'][$trainingItem['forceName']] = $trainingItem['forceLevel'];
 
     // Write to file
-    $messages = [];
-    $messages[] = ["role" => "system", "content" => "You are the Mir4info.com NFT Valuator"];
-    $messages[] = ["role" => "user", "content" => json_encode($record)];
-    $messages[] = ["role" => "assistant", "content" => json_encode(["usd_price" => $usd_price])];
-    $messages2 = [];
-    $messages2["messages"] = $messages;
-    file_put_contents("data.jsonl", json_encode($messages2) . "\n", FILE_APPEND);
+    $messages = [
+        "prompt" => json_encode($record) . "\n",
+        "completion" => json_encode(["usd" => $usd_price]) . "\n"
+    ];
+    file_put_contents("data.jsonl", json_encode($messages) . "\n", FILE_APPEND);
 }
 
 function getGrade($grade)
 {
     $grade = strval($grade);
     return match ($grade) {
-        "1" => "Common",
-        "2" => "Uncommon",
-        "3" => "Rare",
-        "4" => "Epic",
-        "5" => "Legendary",
-        default => "Common"
+        "1" => "1",
+        "2" => "2",
+        "3" => "3",
+        "4" => "4",
+        "5" => "5",
+        default => "1"
     };
 }
 
@@ -170,7 +167,7 @@ function getClass($class)
 function tradeable($itemID)
 {
     return match (substr($itemID, 3, 1)) {
-        "1" => "yes",
-        default => "no"
+        "1" => "y",
+        default => "n"
     };
 }

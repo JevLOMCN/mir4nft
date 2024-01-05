@@ -17,7 +17,6 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
         `building`.`json` AS `building`,
         `codex`.`json` AS `codex`,
         `holystuff`.`json` AS `holystuff`,
-        `inven`.`json` AS `inven`,
         `magicorb`.`json` AS `magicorb`,
         `mysticalpiece`.`json` AS `mysticalpiece`,
         `potential`.`json` AS `potential`,
@@ -31,7 +30,6 @@ $result = $db->query("SELECT `sequence`.`usd_price`,
     INNER JOIN `building` ON `sequence`.`transportID` = `building`.`transportID`
     INNER JOIN `codex` ON `sequence`.`transportID` = `codex`.`transportID`
     INNER JOIN `holystuff` ON `sequence`.`transportID` = `holystuff`.`transportID`
-    INNER JOIN `inven` ON `sequence`.`transportID` = `inven`.`transportID`
     INNER JOIN `magicorb` ON `sequence`.`transportID` = `magicorb`.`transportID`
     INNER JOIN `mysticalpiece` ON `sequence`.`transportID` = `mysticalpiece`.`transportID`
     INNER JOIN `potential` ON `sequence`.`transportID` = `potential`.`transportID`
@@ -114,7 +112,6 @@ while ($row = $result->fetch_assoc()) {
         if ($spiritItem['grade'] >= 4) $record['spirits'][] = [
             'name' => $spiritItem['petName'],
             'grade' => getGrade($spiritItem['grade']),
-            'transend' => $spiritItem['transcend']
         ];
     }
 
@@ -141,12 +138,12 @@ function getGrade($grade)
 {
     $grade = strval($grade);
     return match ($grade) {
-        "1" => "Common",
-        "2" => "Uncommon",
-        "3" => "Rare",
-        "4" => "Epic",
-        "5" => "Legendary",
-        default => "Common"
+        "1" => "1",
+        "2" => "2",
+        "3" => "3",
+        "4" => "4",
+        "5" => "5",
+        default => "1"
     };
 }
 
