@@ -49,17 +49,27 @@ class StatCheckConsumer
                 `transportID`, `json`
             ) VALUES (
                 '$transportID', '$response_escaped'
-            ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';";
+            ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';\n";
         } else {
             $query = "INSERT INTO `summary` (
                 `seq`, `json`
             ) VALUES (
                 '$seq', '$response_escaped'
-            ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';";
-            $tradeType = json_decode($response, true)['data']['tradeType'] ?? null;
-            if ($tradeType) {
-                $tradeType = $this->sql->escape($tradeType);
-                $query .= "UPDATE `sequence` SET `tradeType` = '$tradeType' WHERE `seq` = '$seq';";
+            ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';\n";
+            $response_data = json_decode($response, true)['data'] ?? null;
+            if ($response_data) {
+                $tradeType = $response_data['tradeType'] ?? null;
+                if ($tradeType) {
+                    $tradeType_escaped = $this->sql->escape($tradeType);
+                    $query .= "UPDATE `sequence` SET `tradeType` = '$tradeType_escaped' WHERE `seq` = '$seq';\n";
+                    if ($tradeType == 3) {
+                        $tradeDT = $response_data['tradeDT'] ?? null;
+                        if ($tradeDT) {
+                            $tradeDT_escaped = strtotime($tradeDT);
+                            $query .= "UPDATE `sequence` SET `tradeDT` = '$tradeDT_escaped' WHERE `seq` = '$seq' AND `tradeDT` IS NULL;\n";
+                        }
+                    }
+                }
             }
         }
         $this->sql->multi($query);
