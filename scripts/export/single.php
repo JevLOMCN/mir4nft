@@ -53,6 +53,7 @@ if (!$result) {
 }
 
 $record = Export::row($result->fetch_assoc());
-echo (json_encode($record, JSON_PRETTY_PRINT) . "\n");
-$usd_price = json_decode($ai->complete(json_encode($record)), true)['usd_price'];
-echo "USD Price: \$$usd_price\n";
+$record = json_encode($record) . "\n";
+echo($record);
+$result = $ai->complete($record);
+echo($result."\n");
