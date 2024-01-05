@@ -102,13 +102,13 @@ class Export
      * @param array $summary The summary data to process.
      * @return array The processed summary data.
      */
-    public static function processSummary(array $summary): array
+    public static function summary(array $summary): array
     {
         $processedSummary = [
             'class' => $summary['character']['class'],
             'level' => $summary['character']['level'],
             'power' => $summary['character']['powerScore'],
-            'equip' => self::processEquipItems($summary['equipItem']),
+            'equip' => self::summary_equip($summary['equipItem']),
         ];
 
         return $processedSummary;
@@ -120,7 +120,7 @@ class Export
      * @param array $equipItems The equip items data to process.
      * @return array The processed equip items data.
      */
-    private static function processEquipItems(array $equipItems): array
+    private static function summary_equip(array $equipItems): array
     {
         $processedEquipItems = [];
 
