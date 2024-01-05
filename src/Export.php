@@ -375,7 +375,7 @@ class Export
         }
 
         foreach ($training as $trainingItem) {
-            $processedTraining[$trainingItem['trainingId']] = $trainingItem['trainingValue'];
+            $processedTraining[$trainingItem['forceIdx']] = $trainingItem['forceLevel'];
         }
 
         ksort($processedTraining);
