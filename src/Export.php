@@ -304,11 +304,11 @@ class Export
     /**
      * Processes the spirit data.
      *
-     * This method iterates over the input spirit data and for each spirit item, it extracts the 'spiritId' and 'spiritLv' and stores them in an array with 'spiritId' as the key.
-     * The resulting array is sorted by 'spiritId' in ascending order and returned.
+     * This method iterates over the input spirit data and for each spirit item, if the 'grade' is 5 (Legendary), it extracts the 'petName' and stores it in an array.
+     * The resulting array is sorted by 'petName' in ascending order and returned.
      *
-     * @param array $spirit The spirit data to process.
-     * @return array The processed spirit data.
+     * @param array $spirit The spirit data to process. It's expected to have a key 'inven' which contains an array of spirit items. Each spirit item is an associative array with keys 'grade' and 'petName'.
+     * @return array The processed spirit data. An array of 'petName' strings of spirits with 'grade' 5, sorted in ascending order.
      */
     public static function spirit(array $spirit): array
     {
@@ -320,9 +320,7 @@ class Export
             }
         }
 
-        usort($processedSpirit, function ($a, $b) {
-            return $a['grade'] - $b['grade'] ?: strcmp($a['name'], $b['name']);
-        });
+        sort($processedSpirit);
 
         return $processedSpirit;
     }
@@ -340,7 +338,7 @@ class Export
     public static function stats(array $stats): array
     {
         $processedStats = [];
-        $statsData = array_column($stats, 'statValue', 'statId');
+        $statsData = array_column($stats, 'statValue', 'statName');
 
         foreach (self::STATS as $stat) {
             if (isset($statsData[$stat])) {
