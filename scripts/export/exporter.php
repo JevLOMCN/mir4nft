@@ -43,18 +43,18 @@ while ($row = $result->fetch_assoc()) {
     // summary
     $summary = json_decode($row['summary'], true)['data'];
     // transport parts
-    $record['class'] = getClass($summary['character']['class']);
-    $record['level'] = $summary['character']['level'];
-    $record['powerScore'] = $summary['character']['powerScore'];
-    foreach ($summary['equipItem'] as $equipItem) $record['equipItems'][] = [
-        'name' => $equipItem['itemName'],
-        'grade' => getGrade($equipItem['grade']),
-        'tier' => $equipItem['tier'],
-        'enhance' => $equipItem['enhance'],
+    $record['c'] = $summary['character']['class'];
+    $record['l'] = $summary['character']['level'];
+    $record['p'] = $summary['character']['powerScore'];
+    foreach ($summary['equipItem'] as $equipItem) $record['e'][] = [
+        'i' => $equipItem['itemIdx'],
+        'g' => $equipItem['grade'],
+        't' => $equipItem['tier'],
+        'e' => $equipItem['enhance'],
     ];
 
     // assets
-    $record['assets'] = json_decode($row['assets'], true)['data'];
+    $record['a'] = json_decode($row['assets'], true)['data'];
 
     // building
     $buildings = json_decode($row['building'], true)['data'];
