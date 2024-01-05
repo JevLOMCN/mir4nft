@@ -5,6 +5,42 @@ namespace RPurinton\Mir4nft;
 use COM;
 use RPurinton\Mir4nft\OpenAI\Client;
 
+
+function getGrade($grade)
+{
+    $grade = strval($grade);
+    return match ($grade) {
+        "1" => "1",
+        "2" => "2",
+        "3" => "3",
+        "4" => "4",
+        "5" => "5",
+        default => "1"
+    };
+}
+
+function getClass($class)
+{
+    $class = strval($class);
+    return match ($class) {
+        "1" => "Warrior",
+        "2" => "Sorcerer",
+        "3" => "Taoist",
+        "4" => "Arbalist",
+        "5" => "Lancer",
+        "6" => "Darkist",
+        default => "Warrior"
+    };
+}
+
+function tradeable($itemID)
+{
+    return match (substr($itemID, 3, 1)) {
+        "1" => "yes",
+        default => "no"
+    };
+}
+
 if (!isset($argv[1])) {
     echo "Usage: php single.php <seq>\n";
     exit;
