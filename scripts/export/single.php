@@ -10,10 +10,6 @@ if (!isset($argv[1])) {
     exit;
 }
 
-require_once(__DIR__ . '/../../Composer.php');
-$log = LogFactory::create("single");
-$ai = new Client($log);
-
 $seq = $argv[1];
 
 // Database connection
@@ -124,8 +120,7 @@ $spirit = json_decode($row['spirit'], true)['data']['inven'];
 foreach ($spirit as $spiritItem) {
     if ($spiritItem['grade'] >= 4) $record['spirits'][] = [
         'name' => $spiritItem['petName'],
-        'grade' => getGrade($spiritItem['grade']),
-        'transend' => $spiritItem['transcend']
+        'grade' => getGrade($spiritItem['grade'])
     ];
 }
 
@@ -145,42 +140,9 @@ unset($training['consitutionName']);
 unset($training['collectName']);
 foreach ($training as $trainingItem) $record['training'][$trainingItem['forceName']] = $trainingItem['forceLevel'];
 
-$prompt = json_encode($record);
-$log->info("prompt", ['prompt' => $prompt]);
-$result = $ai->complete($prompt);
-$log->info("result", ['result' => $result]);
 
-function getGrade($grade)
-{
-    $grade = strval($grade);
-    return match ($grade) {
-        "1" => "1",
-        "2" => "2",
-        "3" => "3",
-        "4" => "4",
-        "5" => "5",
-        default => "1"
-    };
-}
-
-function getClass($class)
-{
-    $class = strval($class);
-    return match ($class) {
-        "1" => "Warrior",
-        "2" => "Sorcerer",
-        "3" => "Taoist",
-        "4" => "Arbalist",
-        "5" => "Lancer",
-        "6" => "Darkist",
-        default => "Warrior"
-    };
-}
-
-function tradeable($itemID)
-{
-    return match (substr($itemID, 3, 1)) {
-        "1" => "yes",
-        default => "no"
-    };
-}
+require_once(__DIR__ . '/../../Composer.php');
+$log = LogFactory::create("single");
+$ai = new Client($log);
+$usd = json_decode($ai->complete(json_encode($record)), true)['usd'];
+echo "USD: \$$usd\n";
