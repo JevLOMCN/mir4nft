@@ -314,7 +314,7 @@ class Export
     {
         $processedSpirit = [];
 
-        foreach ($spirit as $spiritItem) {
+        foreach ($spirit['inven'] as $spiritItem) {
             if ($spiritItem['grade'] >= 4) {
                 $processedSpirit[] = [
                     'name' => $spiritItem['petName'],
