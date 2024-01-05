@@ -43,8 +43,8 @@ class NewListingsConsumer
     public function init(): bool
     {
         $this->timer_300();
-        $this->timer_15();
-        $result1 = $this->loop->addPeriodicTimer(15, [$this, 'timer_15']) or throw new Error("failed to add periodic timer");
+        $this->timer_5();
+        $result1 = $this->loop->addPeriodicTimer(5, [$this, 'timer_5']) or throw new Error("failed to add periodic timer");
         $result2 = $this->loop->addPeriodicTimer(300, [$this, 'timer_300']) or throw new Error("failed to add periodic timer");
         $success = $result1 instanceof TimerInterface && $result2 instanceof TimerInterface;
         if ($success) $this->log->info("periodic timers added");
@@ -98,9 +98,9 @@ class NewListingsConsumer
         return $USDWemixRate;
     }
 
-    public function timer_15(): void
+    public function timer_5(): void
     {
-        $this->log->debug("timer_15 fired");
+        $this->log->debug("timer_5 fired");
         $this->update_max_seq();
         $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
         $this->log->debug("getting url", [$url]);
