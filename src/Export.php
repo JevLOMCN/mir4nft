@@ -282,8 +282,8 @@ class Export
     /**
      * Processes the skills data.
      *
-     * This method iterates over the input skills data and for each skill item, it extracts the 'skillId' and 'skillLv' and stores them in an array with 'skillId' as the key.
-     * The resulting array is sorted by 'skillId' in ascending order and returned.
+     * This method iterates over the input skills data and for each skill item, it extracts the 'skillName' and 'skillLevel' and stores them in an array with 'skillName' as the key.
+     * The resulting array is sorted by 'skillName' in ascending order and returned.
      *
      * @param array $skills The skills data to process.
      * @return array The processed skills data.
@@ -293,12 +293,10 @@ class Export
         $processedSkills = [];
 
         foreach ($skills as $skill) {
-            $processedSkills[$skill['skillId']] = $skill['skillLv'];
+            $processedSkills[$skill['skillName']] = $skill['skillLevel'];
         }
 
-        uksort($processedSkills, function ($a, $b) {
-            return $a <=> $b;
-        });
+        ksort($processedSkills);
 
         return $processedSkills;
     }
@@ -317,11 +315,16 @@ class Export
         $processedSpirit = [];
 
         foreach ($spirit as $spiritItem) {
-            $processedSpirit[$spiritItem['spiritId']] = $spiritItem['spiritLv'];
+            if ($spiritItem['grade'] >= 4) {
+                $processedSpirit[] = [
+                    'name' => $spiritItem['petName'],
+                    'grade' => $spiritItem['grade']
+                ];
+            }
         }
 
-        uksort($processedSpirit, function ($a, $b) {
-            return $a <=> $b;
+        usort($processedSpirit, function ($a, $b) {
+            return $a['grade'] - $b['grade'] ?: strcmp($a['name'], $b['name']);
         });
 
         return $processedSpirit;
