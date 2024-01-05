@@ -328,23 +328,24 @@ class Export
     /**
      * Processes the stats data.
      *
-     * This method iterates over the STATS constant and for each stat in STATS, it checks if the stat exists in the input stats data.
-     * If it does, it stores the 'statValue' in an array with the stat as the key.
-     * The resulting array is returned.
+     * This method iterates over the 'lists' key of the input stats data. For each item, it checks if the 'statName' exists in the STATS constant.
+     * If it does, it stores the 'statValue' from the input stats data in an array with the 'statName' as the key.
+     * The resulting array is sorted by key in ascending order and returned.
      *
-     * @param array $stats The stats data to process.
-     * @return array The processed stats data.
+     * @param array $stats The stats data to process. It's expected to have a key 'lists' which contains an array of stats items. Each stats item is an associative array with keys 'statName' and 'statValue'.
+     * @return array The processed stats data. An array with 'statName' as keys and 'statValue' as values, sorted by 'statName' in ascending order.
      */
     public static function stats(array $stats): array
     {
         $processedStats = [];
-        $statsData = array_column($stats, 'statValue', 'statName');
 
-        foreach (self::STATS as $stat) {
-            if (isset($statsData[$stat])) {
-                $processedStats[$stat] = $statsData[$stat];
+        foreach ($stats['lists'] as $stat) {
+            if (isset(self::STATS[$stat['statName']])) {
+                $processedStats[$stat['statName']] = $stats['statValue'];
             }
         }
+
+        ksort($processedStats);
 
         return $processedStats;
     }
