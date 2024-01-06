@@ -36,12 +36,17 @@ class NewListingsConsumer
     private array $pending_sales = [];
     private ?Publisher $pub = null;
 
-    public function __construct(private Log $log, private MySQL $sql, private LoopInterface $loop)
-    {
+    public function __construct(
+        private Log $log,
+        private MySQL $sql,
+        private LoopInterface $loop
+    ) {
+        $log->debug("NewListingsConsumer created");
     }
 
     public function init(): bool
     {
+        $this->log->debug("initializing NewListingsConsumer");
         $this->timer_300();
         $this->timer_5();
         $result1 = $this->loop->addPeriodicTimer(5, [$this, 'timer_5']) or throw new Error("failed to add periodic timer");
