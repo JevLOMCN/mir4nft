@@ -170,7 +170,8 @@ class NewListingsConsumer
     private function stat_check($seq, $transportID, $class, $stat_check): bool
     {
         $this->log->debug("stat check", [$stat_check]);
-        if ($stat_check !== "summary") extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `transportID` = '$transportID';")) or throw new Error("failed to get stat check count");
+        if ($stat_check === "priceeval") $count = 0;
+        elseif ($stat_check !== "summary") extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `transportID` = '$transportID';")) or throw new Error("failed to get stat check count");
         else extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `seq` = '$seq';")) or throw new Error("failed to get stat check count");
         if ($count) return true;
         $payload = [
