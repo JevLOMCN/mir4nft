@@ -127,7 +127,7 @@ class NewListingsConsumer
 
         $result = $this->sql->query("SELECT `seq` FROM `sequence` WHERE `transportID` = '$transportID' AND `tradeType` = '1';") or throw new Error("failed to get sequence");
         if ($result->num_rows) {
-            while ($cancelling[] = $result->fetch_assoc()['seq']);
+            while ($row = $result->fetch_assoc()) $cancelling[] = $row['seq'];
             $this->sql->query("UPDATE `sequence` SET `tradeType` = '2' WHERE `transportID` = '$transportID' AND `tradeType` = '1';") or throw new Error("failed to cancel sequence");
         }
 
