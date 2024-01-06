@@ -54,6 +54,7 @@ class NewListingsConsumer
 
     private function update_max_seq()
     {
+        $this->log->debug("updating max seq");
         extract($this->sql->single("SELECT MAX(`seq`) as `max_seq` FROM `sequence`;")) or throw new Error("failed to get max seq");
         $this->max_seq = $max_seq;
     }
@@ -67,6 +68,7 @@ class NewListingsConsumer
 
     private function update_wemix_data($response)
     {
+        $this->log->debug("updating wemix data");
         $data = json_decode($response, true);
         $this->validate_wemix_data($data) or throw new Error("received invalid response");
         $this->parse_wemix_data($data) or throw new Error("failed to parse wemix data");
@@ -75,11 +77,13 @@ class NewListingsConsumer
 
     private function validate_wemix_data($data): bool
     {
+        $this->log->debug("validating wemix data");
         return is_array($data) && isset($data['Data']) && is_array($data['Data']);
     }
 
     private function parse_wemix_data($data): bool
     {
+        $this->log->debug("parsing wemix data");
         $wemix_data = [];
         foreach ($data['Data'] as $item) {
             $CreatedDT = strtotime($item['CreatedDT']);
@@ -92,6 +96,7 @@ class NewListingsConsumer
 
     private function get_wemix_rate($timestamp)
     {
+        $this->log->debug("getting wemix rate", [$timestamp]);
         foreach ($this->wemix_data as $CreatedDT => $USDWemixRate) {
             if ($timestamp >= $CreatedDT) return $USDWemixRate;
         }
@@ -114,11 +119,13 @@ class NewListingsConsumer
 
     private function validate_data($data): bool
     {
+        $this->log->debug("validating data");
         return is_array($data) && isset($data['data']['lists']) && is_array($data['data']['lists']);
     }
 
     private function process_listings(array $listings): bool
     {
+        $this->log->debug("processing listings");
         $new_listings = $this->filter_listings($listings);
         if (!count($new_listings)) return true;
         foreach (array_reverse($new_listings) as $listing) {
@@ -130,6 +137,7 @@ class NewListingsConsumer
 
     private function filter_listings(array $listings): array
     {
+        $this->log->debug("filtering listings");
         $new_listings = [];
         foreach ($listings as $listing) {
             if ($listing['seq'] <= $this->max_seq) continue;
@@ -150,6 +158,7 @@ class NewListingsConsumer
 
     private function insert_records($listing): array
     {
+        $this->log->debug("inserting records", [$listing]);
         extract($this->sql->escape($listing)) or throw new Error("failed to extract escaped listing");
         $query = "INSERT INTO `transports` (
             `transportID`, `nftID`, `sealedDT`,
@@ -192,6 +201,7 @@ class NewListingsConsumer
 
     private function stat_check($seq, $transportID, $class, $stat_check): bool
     {
+        $this->log->debug("stat check", [$stat_check]);
         if ($stat_check !== "summary") extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `transportID` = '$transportID';")) or throw new Error("failed to get stat check count");
         else extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `seq` = '$seq';")) or throw new Error("failed to get stat check count");
         if ($count) return true;
@@ -214,6 +224,7 @@ class NewListingsConsumer
 
     private function check_completed(): bool
     {
+        $this->log->debug("checking completed");
         $this->update_pending_sales() or throw new Error("failed to update pending sales");
         $response = HTTPS::get($this->completed_url) or throw new Error("failed to get completed");
         $data = json_decode($response, true);
@@ -224,6 +235,7 @@ class NewListingsConsumer
 
     private function update_pending_sales(): bool
     {
+        $this->log->debug("updating pending sales");
         $result = $this->sql->query("SELECT `seq`,`transportID` FROM `sequence` WHERE `tradeType` = '1';") or throw new Error("failed to get pending sales");
         $pending_sales = [];
         while ($row = $result->fetch_assoc()) {
@@ -235,11 +247,13 @@ class NewListingsConsumer
 
     private function validate_completed($data): bool
     {
+        $this->log->debug("validating completed");
         return is_array($data) && isset($data['data']['lists']) && is_array($data['data']['lists']);
     }
 
     private function process_completed(array $listings): bool
     {
+        $this->log->debug("processing completed");
         foreach ($listings as $listing) {
             if (!isset($this->pending_sales[$listing['info']['seq']])) continue;
             $this->process_completed_listing($listing['info']) or throw new Error("failed to process completed listing");
@@ -260,6 +274,7 @@ class NewListingsConsumer
 
     private function get_usd_price($listing)
     {
+        $this->log->debug("getting usd price", [$listing]);
         $timestamp = strtotime($listing['tradeDT']);
         $wemix_rate = $this->get_wemix_rate($timestamp);
         $usd_price = $listing['price'] * $wemix_rate;
