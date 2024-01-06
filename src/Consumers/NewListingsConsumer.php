@@ -264,9 +264,9 @@ class NewListingsConsumer
     private function process_completed_listing(array $listing): bool
     {
         $this->log->debug("received completed listing", [$listing]);
-        $timestamp = strtotime($listing['tradeDT']);
         $usd_price = $this->get_usd_price($listing);
         $seq = $this->sql->escape($listing['seq']);
+        $timestamp = $this->sql->escape($listing['tradeDT']);
         $query = "UPDATE `sequence` SET `tradeType` = '3', `usd_price` = '$usd_price', `tradeDT` = '$timestamp' WHERE `seq` = '$seq';";
         $this->sql->query($query) or throw new Error("failed to update sequence");
         return true;
@@ -275,7 +275,7 @@ class NewListingsConsumer
     private function get_usd_price($listing)
     {
         $this->log->debug("getting usd price", [$listing]);
-        $timestamp = strtotime($listing['tradeDT']);
+        $timestamp = $listing['tradeDT'];
         $wemix_rate = $this->get_wemix_rate($timestamp);
         $usd_price = $listing['price'] * $wemix_rate;
         $usd_price = round($usd_price, 2);
