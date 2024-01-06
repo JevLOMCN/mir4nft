@@ -6,11 +6,18 @@ use Bunny\{Channel, Message};
 use React\EventLoop\LoopInterface;
 use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error};
 use RPurinton\Mir4nft\RabbitMQ\Consumer;
+use RPurinton\Mir4nft\OpenAI\Client;
 
 class StatCheckConsumer
 {
-    public function __construct(private Log $log, private MySQL $sql, private LoopInterface $loop, private Consumer $mq)
-    {
+    public function __construct(
+        private Log $log,
+        private LoopInterface $loop,
+        private MySQL $sql,
+        private Consumer $mq,
+        private Client $ai,
+    ) {
+        $log->debug("constructing stat check consumer");
     }
 
     public function init(): bool
@@ -42,6 +49,7 @@ class StatCheckConsumer
     private function insert_stats($data): bool
     {
         extract($data) or throw new Error("failed to extract data");
+        if ($stat_check === 'priceeval') return $this->price_eval($seq, $transportID);
         $response = HTTPS::get($stat_url) or throw new Error("failed to get url");
         $response_escaped = $this->sql->escape($response);
         if ($stat_check !== "summary") {
@@ -74,6 +82,37 @@ class StatCheckConsumer
         }
         $this->sql->multi($query);
         $this->log->debug("inserted stats", [$query]);
+        return true;
+    }
+
+    private function price_eval($seq, $transportID): bool
+    {
+        $this->log->info("waiting for all stats to be available");
+        $retries = 0;
+        while (true) {
+            if ($retries++ > 60) throw new Error("timed out waiting for stats");
+            $query = "SELECT count(1) as `ready`
+                FROM `transports`
+                INNER JOIN `assets` ON `transports`.`transportID` = `assets`.`transportID`
+                INNER JOIN `building` ON `transports`.`transportID` = `building`.`transportID`
+                INNER JOIN `codex` ON `transports`.`transportID` = `codex`.`transportID`
+                INNER JOIN `holystuff` ON `transports`.`transportID` = `holystuff`.`transportID`
+                INNER JOIN `inven` ON `transports`.`transportID` = `inven`.`transportID`
+                INNER JOIN `magicorb` ON `transports`.`transportID` = `magicorb`.`transportID`
+                INNER JOIN `magicstone` ON `transports`.`transportID` = `magicstone`.`transportID`
+                INNER JOIN `mysticalpiece` ON `transports`.`transportID` = `mysticalpiece`.`transportID`
+                INNER JOIN `potential` ON `transports`.`transportID` = `potential`.`transportID`
+                INNER JOIN `skills` ON `transports`.`transportID` = `skills`.`transportID`
+                INNER JOIN `spirit` ON `transports`.`transportID` = `spirit`.`transportID`
+                INNER JOIN `stats` ON `transports`.`transportID` = `stats`.`transportID`
+                INNER JOIN `training` ON `transports`.`transportID` = `training`.`transportID`
+                INNER JOIN `summary` ON `summary`.`seq` = $seq
+                WHERE `transports`.`transportID` = $transportID";
+            extract($this->sql->single($query));
+            if ($ready) break;
+            sleep(1);
+        }
+        $this->log->info("all stats are available");
         return true;
     }
 }

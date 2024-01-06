@@ -29,9 +29,11 @@ class NewListingsConsumer
     ];
     private string $stats_url = "character/";
     private array $stat_checks = [
-        "summary", "inven", "skills", "stats", "spirit",
+        "summary", // special case
+        "inven", "skills", "stats", "spirit",
         "magicorb", "magicstone", "mysticalpiece", "building",
-        "training", "holystuff", "assets", "potential", "codex"
+        "training", "holystuff", "assets", "potential", "codex",
+        "priceeval", // special case
     ];
     private array $pending_sales = [];
     private ?Publisher $pub = null;
@@ -57,48 +59,6 @@ class NewListingsConsumer
         return $success;
     }
 
-    private function update_max_seq()
-    {
-        $this->log->debug("updating max seq");
-        extract($this->sql->single("SELECT MAX(`seq`) as `max_seq` FROM `sequence`;")) or throw new Error("failed to get max seq");
-        $this->max_seq = $max_seq;
-    }
-
-    public function timer_300(): void
-    {
-        $this->log->debug("timer_300 fired");
-        $response = HTTPS::post($this->wemix_url, ["Content-type: application/json"]) or throw new Error("failed to get response");
-        $this->update_wemix_data($response) or throw new Error("failed to update wemix data");
-    }
-
-    private function update_wemix_data($response)
-    {
-        $this->log->debug("updating wemix data");
-        $data = json_decode($response, true);
-        $this->validate_wemix_data($data) or throw new Error("received invalid response");
-        $this->parse_wemix_data($data) or throw new Error("failed to parse wemix data");
-        return true;
-    }
-
-    private function validate_wemix_data($data): bool
-    {
-        $this->log->debug("validating wemix data");
-        return is_array($data) && isset($data['Data']) && is_array($data['Data']);
-    }
-
-    private function parse_wemix_data($data): bool
-    {
-        $this->log->debug("parsing wemix data");
-        $wemix_data = [];
-        foreach ($data['Data'] as $item) {
-            $CreatedDT = strtotime($item['CreatedDT']);
-            $USDWemixRate = $item['USDWemixRate'];
-            $wemix_data[$CreatedDT] = $USDWemixRate;
-        }
-        $this->wemix_data = array_reverse($wemix_data);
-        return true;
-    }
-
     public function timer_5(): void
     {
         $this->log->debug("timer_5 fired");
@@ -111,6 +71,13 @@ class NewListingsConsumer
         $this->validate_data($data) or throw new Error("received invalid response");
         $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
         $this->check_completed() or throw new Error("failed to check completed");
+    }
+
+    public function timer_300(): void
+    {
+        $this->log->debug("timer_300 fired");
+        $response = HTTPS::post($this->wemix_url, ["Content-type: application/json"]) or throw new Error("failed to get response");
+        $this->update_wemix_data($response) or throw new Error("failed to update wemix data");
     }
 
     private function validate_data($data): bool
@@ -146,7 +113,8 @@ class NewListingsConsumer
     {
         $this->log->debug("received new listing", [$listing]);
         $this->max_seq = max($listing['seq'], $this->max_seq);
-        [$seq, $transportID, $class] = $this->insert_records($listing) or throw new Error("failed to insert records");
+        [$seq, $transportID, $class, $cancelling, $transport_exists_already] = $this->insert_records($listing) or throw new Error("failed to insert records");
+        if ($transport_exists_already) return true;
         $this->stat_checks($seq, $transportID, $class) or throw new Error("failed to publish stat checks");
         $this->log->debug("published stat checks", [$transportID]);
         return true;
@@ -156,21 +124,26 @@ class NewListingsConsumer
     {
         $this->log->debug("inserting records", [$listing]);
         extract($this->sql->escape($listing)) or throw new Error("failed to extract escaped listing");
-        $query = "INSERT INTO `transports` (
-            `transportID`, `nftID`, `sealedDT`,
-            `characterName`, `class`, `lv`, `powerScore`
-        ) VALUES (
-            '$transportID', '$nftID', '$sealedDT',
-            '$characterName', '$class', '$lv', '$powerScore'
-        ) ON DUPLICATE KEY UPDATE
-            `nftID` = '$nftID',
-            `sealedDT` = '$sealedDT',
-            `characterName` = '$characterName',
-            `class` = '$class',
-            `lv` = '$lv',
-            `powerScore` = '$powerScore';
-        UPDATE `sequence` SET `tradeType` = '2' WHERE `transportID` = '$transportID' AND `tradeType` = '1';
-        INSERT INTO `sequence` (
+
+        $result = $this->sql->query("SELECT `seq` FROM `sequence` WHERE `transportID` = '$transportID' AND `tradeType` = '1';") or throw new Error("failed to get sequence");
+        if ($result->num_rows) {
+            while ($cancelling[] = $result->fetch_assoc()['seq']);
+            $this->sql->query("UPDATE `sequence` SET `tradeType` = '2' WHERE `transportID` = '$transportID' AND `tradeType` = '1';") or throw new Error("failed to cancel sequence");
+        }
+
+        extract($this->sql->single("SELECT count(1) as `transport_exists_already` FROM `transports` WHERE `transportID` = '$transportID';")) or throw new Error("failed to get transport count");
+        if (!$transport_exists_already) {
+            $this->log->debug("transport does not exist already", [$transportID]);
+            $this->sql->query("INSERT INTO `transports` (
+                `transportID`, `nftID`, `sealedDT`,
+                `characterName`, `class`, `lv`, `powerScore`
+            ) VALUES (
+                '$transportID', '$nftID', '$sealedDT',
+                '$characterName', '$class', '$lv', '$powerScore'
+            );") or throw new Error("failed to insert transport");
+        }
+
+        $this->sql->query("INSERT INTO `sequence` (
             `seq`, `transportID`, `price`,
             `MirageScore`, `MiraX`, `Reinforce`
         ) VALUES (
@@ -180,10 +153,9 @@ class NewListingsConsumer
             `price` = '$price',
             `MirageScore` = '$MirageScore',
             `MiraX` = '$MiraX',
-            `Reinforce` = '$Reinforce';";
-        $this->log->debug("inserting new listing", [$query]);
-        $this->sql->multi($query);
-        return [$seq, $transportID, $class];
+            `Reinforce` = '$Reinforce';") or throw new Error("failed to insert sequence");
+        $this->log->debug("inserted new listing");
+        return [$seq, $transportID, $class, $cancelling ?? [], $transport_exists_already ?? false];
     }
 
     private function stat_checks($seq, $transportID, $class): bool
@@ -285,5 +257,40 @@ class NewListingsConsumer
             if ($timestamp >= $CreatedDT) return $USDWemixRate;
         }
         return $USDWemixRate;
+    }
+
+    private function update_wemix_data($response)
+    {
+        $this->log->debug("updating wemix data");
+        $data = json_decode($response, true);
+        $this->validate_wemix_data($data) or throw new Error("received invalid response");
+        $this->parse_wemix_data($data) or throw new Error("failed to parse wemix data");
+        return true;
+    }
+
+    private function validate_wemix_data($data): bool
+    {
+        $this->log->debug("validating wemix data");
+        return is_array($data) && isset($data['Data']) && is_array($data['Data']);
+    }
+
+    private function parse_wemix_data($data): bool
+    {
+        $this->log->debug("parsing wemix data");
+        $wemix_data = [];
+        foreach ($data['Data'] as $item) {
+            $CreatedDT = strtotime($item['CreatedDT']);
+            $USDWemixRate = $item['USDWemixRate'];
+            $wemix_data[$CreatedDT] = $USDWemixRate;
+        }
+        $this->wemix_data = array_reverse($wemix_data);
+        return true;
+    }
+
+    private function update_max_seq()
+    {
+        $this->log->debug("updating max seq");
+        extract($this->sql->single("SELECT MAX(`seq`) as `max_seq` FROM `sequence`;")) or throw new Error("failed to get max seq");
+        $this->max_seq = $max_seq;
     }
 }

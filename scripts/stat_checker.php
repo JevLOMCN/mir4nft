@@ -7,6 +7,7 @@ use React\EventLoop\Loop;
 use RPurinton\Mir4nft\{MySQL, Error};
 use RPurinton\Mir4nft\RabbitMQ\Consumer;
 use RPurinton\Mir4nft\Consumers\StatCheckConsumer;
+use RPurinton\Mir4nft\OpenAI\Client;
 
 $worker_id = $argv[1] ?? 0;
 
@@ -33,7 +34,7 @@ try {
     exit(1);
 }
 $loop = Loop::get();
-$nlc = new StatCheckConsumer($log, new MySQL($log), $loop, new Consumer) or throw new Error("failed to create NewListingsConsumer");
+$nlc = new StatCheckConsumer($log, $loop, new MySQL($log), new Consumer, new Client($log)) or throw new Error("failed to create NewListingsConsumer");
 $nlc->init() or throw new Error("failed to initialize NewListingsConsumer");
 $loop->addSignal(SIGINT, function () use ($loop, $log) {
     $log->info("SIGINT received, exiting...");
