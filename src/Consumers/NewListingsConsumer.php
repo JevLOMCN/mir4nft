@@ -114,7 +114,10 @@ class NewListingsConsumer
         $this->log->debug("received new listing", [$listing]);
         $this->max_seq = max($listing['seq'], $this->max_seq);
         [$seq, $transportID, $class, $cancelling, $transport_exists_already] = $this->insert_records($listing) or throw new Error("failed to insert records");
-        if ($transport_exists_already) return true;
+        if ($transport_exists_already) {
+            $this->stat_check($seq, $transportID, $class, "summary") or throw new Error("failed to publish stat check");
+            return true;
+        }
         $this->stat_checks($seq, $transportID, $class) or throw new Error("failed to publish stat checks");
         $this->log->debug("published stat checks", [$transportID]);
         return true;
