@@ -28,7 +28,7 @@ class StatusUpdater
         while ($row = $result->fetch_assoc()) {
             extract($row);
             $this->log->debug("updating status", [$seq, $transportID]);
-            $this->stat_check($seq, $transportID, "summary");
+            $this->stat_check($seq, $transportID, "priceeval");
         }
         $this->log->info("Status updated");
     }
