@@ -94,15 +94,6 @@ class NewListingsConsumer
         return true;
     }
 
-    private function get_wemix_rate($timestamp)
-    {
-        $this->log->debug("getting wemix rate", [$timestamp]);
-        foreach ($this->wemix_data as $CreatedDT => $USDWemixRate) {
-            if ($timestamp >= $CreatedDT) return $USDWemixRate;
-        }
-        return $USDWemixRate;
-    }
-
     public function timer_5(): void
     {
         $this->log->debug("timer_5 fired");
@@ -280,5 +271,14 @@ class NewListingsConsumer
         $usd_price = $listing['price'] * $wemix_rate;
         $usd_price = round($usd_price, 2);
         return $usd_price;
+    }
+
+    private function get_wemix_rate($timestamp)
+    {
+        $this->log->debug("getting wemix rate", [$timestamp]);
+        foreach ($this->wemix_data as $CreatedDT => $USDWemixRate) {
+            if ($timestamp >= $CreatedDT) return $USDWemixRate;
+        }
+        return $USDWemixRate;
     }
 }
