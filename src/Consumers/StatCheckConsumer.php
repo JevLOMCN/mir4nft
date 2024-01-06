@@ -4,7 +4,7 @@ namespace RPurinton\Mir4nft\Consumers;
 
 use Bunny\{Channel, Message};
 use React\EventLoop\LoopInterface;
-use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error};
+use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error, Export};
 use RPurinton\Mir4nft\RabbitMQ\Consumer;
 use RPurinton\Mir4nft\OpenAI\Client;
 
@@ -87,32 +87,53 @@ class StatCheckConsumer
 
     private function price_eval($seq, $transportID): bool
     {
-        $this->log->info("waiting for all stats to be available");
+        $this->log->debug("waiting for all stats to be available");
         $retries = 0;
         while (true) {
             if ($retries++ > 60) throw new Error("timed out waiting for stats");
-            $query = "SELECT count(1) as `ready`
-                FROM `transports`
-                INNER JOIN `assets` ON `transports`.`transportID` = `assets`.`transportID`
-                INNER JOIN `building` ON `transports`.`transportID` = `building`.`transportID`
-                INNER JOIN `codex` ON `transports`.`transportID` = `codex`.`transportID`
-                INNER JOIN `holystuff` ON `transports`.`transportID` = `holystuff`.`transportID`
-                INNER JOIN `inven` ON `transports`.`transportID` = `inven`.`transportID`
-                INNER JOIN `magicorb` ON `transports`.`transportID` = `magicorb`.`transportID`
-                INNER JOIN `magicstone` ON `transports`.`transportID` = `magicstone`.`transportID`
-                INNER JOIN `mysticalpiece` ON `transports`.`transportID` = `mysticalpiece`.`transportID`
-                INNER JOIN `potential` ON `transports`.`transportID` = `potential`.`transportID`
-                INNER JOIN `skills` ON `transports`.`transportID` = `skills`.`transportID`
-                INNER JOIN `spirit` ON `transports`.`transportID` = `spirit`.`transportID`
-                INNER JOIN `stats` ON `transports`.`transportID` = `stats`.`transportID`
-                INNER JOIN `training` ON `transports`.`transportID` = `training`.`transportID`
-                INNER JOIN `summary` ON `summary`.`seq` = $seq
-                WHERE `transports`.`transportID` = $transportID";
-            extract($this->sql->single($query));
-            if ($ready) break;
+            $result = $this->sql->query("SELECT `summary`.`json` AS `summary`,
+                    `assets`.`json` AS `assets`,
+                    `building`.`json` AS `building`,
+                    `codex`.`json` AS `codex`,
+                    `holystuff`.`json` AS `holystuff`,
+                    `magicorb`.`json` AS `magicorb`,
+                    `mysticalpiece`.`json` AS `mysticalpiece`,
+                    `potential`.`json` AS `potential`,
+                    `skills`.`json` AS `skills`,
+                    `spirit`.`json` AS `spirit`,
+                    `stats`.`json` AS `stats`,
+                    `training`.`json` AS `training`
+                FROM `sequence`
+                INNER JOIN `summary` ON `sequence`.`seq` = `summary`.`seq`
+                INNER JOIN `assets` ON `sequence`.`transportID` = `assets`.`transportID`
+                INNER JOIN `building` ON `sequence`.`transportID` = `building`.`transportID`
+                INNER JOIN `codex` ON `sequence`.`transportID` = `codex`.`transportID`
+                INNER JOIN `holystuff` ON `sequence`.`transportID` = `holystuff`.`transportID`
+                INNER JOIN `magicorb` ON `sequence`.`transportID` = `magicorb`.`transportID`
+                INNER JOIN `mysticalpiece` ON `sequence`.`transportID` = `mysticalpiece`.`transportID`
+                INNER JOIN `potential` ON `sequence`.`transportID` = `potential`.`transportID`
+                INNER JOIN `skills` ON `sequence`.`transportID` = `skills`.`transportID`
+                INNER JOIN `spirit` ON `sequence`.`transportID` = `spirit`.`transportID`
+                INNER JOIN `stats` ON `sequence`.`transportID` = `stats`.`transportID`
+                INNER JOIN `training` ON `sequence`.`transportID` = `training`.`transportID`
+                WHERE `sequence`.`seq` = $seq");
+            if (!$result) throw new Error("failed to get stats");
+            if ($result->num_rows == 1) break;
             sleep(1);
         }
-        $this->log->info("all stats are available");
+        $this->log->debug("all stats are available, getting price...");
+        $row = $result->fetch_assoc();
+        $record = Export::row($row);
+        $record = json_encode($record) . "\n";
+        $this->log->debug("record", [$record]);
+        $result = $this->ai->complete($record);
+        $this->log->debug("price eval result", [$result]);
+        $result = json_decode($result, true);
+        $price = $result['usd_price'] ?? null;
+        if (!$price) throw new Error("failed to get price");
+        $price_escaped = $this->sql->escape($price);
+        $query = "INSERT INTO `evals` (`transportID`, `usd_price`) VALUES ('$transportID', '$price_escaped')";
+        $this->sql->query($query);
         return true;
     }
 }
