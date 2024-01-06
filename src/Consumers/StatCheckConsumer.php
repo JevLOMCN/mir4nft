@@ -65,7 +65,7 @@ class StatCheckConsumer
                     if ($tradeType == 3) {
                         $tradeDT = $response_data['tradeDT'] ?? null;
                         if ($tradeDT) {
-                            $tradeDT_escaped = strtotime($tradeDT);
+                            $tradeDT_escaped = $this->sql->escape($tradeDT);
                             $query .= "UPDATE `sequence` SET `tradeDT` = '$tradeDT_escaped' WHERE `seq` = '$seq' AND `tradeDT` IS NULL;\n";
                         }
                     }
