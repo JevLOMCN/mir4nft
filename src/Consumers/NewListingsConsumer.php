@@ -285,6 +285,13 @@ class NewListingsConsumer
             $USDWemixRate = $item['USDWemixRate'];
             $wemix_data[$CreatedDT] = $USDWemixRate;
         }
+        $this->sql->query("INSERT INTO `wemix`
+                (`CreatedDT`, `USDWemixRate`)
+            VALUES
+                ('$CreatedDT', '$USDWemixRate')
+            ON DUPLICATE KEY UPDATE
+                `USDWemixRate` = '$USDWemixRate';
+        ") or throw new Error("failed to insert wemix data");
         $this->wemix_data = array_reverse($wemix_data);
         return true;
     }
