@@ -66,7 +66,7 @@ class NewListingsConsumer
         $url = $this->base_url . $this->lists_url . http_build_query($this->http_query);
         $this->log->debug("getting url", [$url]);
         $response = HTTPS::get($url) or throw new Error("failed to get url");
-        $this->log->debug("received response", [$response]);
+        $this->log->debug("received response");
         $data = json_decode($response, true);
         $this->validate_data($data) or throw new Error("received invalid response");
         $this->process_listings($data['data']['lists']) or throw new Error("failed to process listings");
@@ -111,7 +111,7 @@ class NewListingsConsumer
 
     private function process_listing(array $listing): bool
     {
-        $this->log->debug("received new listing", [$listing]);
+        $this->log->debug("received new listing");
         $this->max_seq = max($listing['seq'], $this->max_seq);
         [$seq, $transportID, $class, $cancelling, $transport_exists_already] = $this->insert_records($listing) or throw new Error("failed to insert records");
         if ($transport_exists_already) {
