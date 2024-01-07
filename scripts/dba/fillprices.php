@@ -16,6 +16,7 @@ $log = LogFactory::create('fillprices');
 $sql = new MySQL($log);
 $ai = new Client($log);
 $pub = new Publisher();
+
 $query = "SELECT sq.transportID, MAX(sq.seq) AS seq
 FROM `sequence` sq
 LEFT JOIN `evals` ev ON sq.transportID = ev.transportID
@@ -35,6 +36,6 @@ while ($row = $result->fetch_assoc()) {
         'stat_check' => 'priceeval',
         'stat_url' => ''
     ];
-    $pub->publish('stat_checker', $message);
+    $pub->publish('stat_checker', $message) or throw new Error("failed to publish stat check");
 }
 echo ("done!\n");
