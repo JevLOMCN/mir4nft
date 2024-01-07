@@ -27,10 +27,12 @@ $embed = [
             'value' => "100%^\n$300",
             'inline' => true
         ]
-    ]
+    ],
+    'footer' => [
+        'text' => '<t:' . time() . ':R>'
+    ],
 ];
 
 new Webhook([
-    'content' => '<t:' . time() . ':R>',
     'embeds' => [$embed]
 ]);
