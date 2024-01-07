@@ -15,18 +15,18 @@ $log = LogFactory::create('fillprices');
 $sql = new MySQL($log);
 $ai = new Client($log);
 
-$query = "SELECT `transportID`
-FROM `transports`
-WHERE `transportID` NOT IN (
-  SELECT DISTINCT `transportID`
-  FROM `evals`
-)";
+$query = "SELECT sq.transportID, MAX(sq.seq) AS seq
+FROM `sequence` sq
+LEFT JOIN `evals` ev ON sq.transportID = ev.transportID
+WHERE ev.transportID IS NULL
+GROUP BY sq.transportID;";
 $result = $sql->query($query);
 $total = $result->num_rows;
 $counter = 0;
 while ($row = $result->fetch_assoc()) {
     $counter++;
+    $seq = $row['seq'];
     $transportID = $row['transportID'];
-    echo ("\rProcessing $transportID - $counter of $total...");
+    echo ("\rProcessing $seq $transportID - $counter of $total...");
 }
 echo ("done!\n");
