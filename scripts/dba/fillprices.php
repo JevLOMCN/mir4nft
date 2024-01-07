@@ -29,5 +29,12 @@ while ($row = $result->fetch_assoc()) {
     $seq = $row['seq'];
     $transportID = $row['transportID'];
     echo ("\rProcessing $seq $transportID - $counter of $total...");
+    $message = [
+        'seq' => $seq,
+        'transportID' => $transportID,
+        'stat_check' => 'priceeval',
+        'stat_url' => ''
+    ];
+    $pub->publish('stat_check', $message);
 }
 echo ("done!\n");
