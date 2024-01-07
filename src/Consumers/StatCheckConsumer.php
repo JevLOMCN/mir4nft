@@ -128,6 +128,7 @@ class StatCheckConsumer
         $this->log->debug("record", [$record]);
         $result = $this->ai->complete($record);
         $this->log->debug("price eval result", [$result]);
+        $result = str_replace(',', '', $result); // remove commas (e.g. 1,000)
         $result = json_decode($result, true);
         $price = $result['usd_price'] ?? null;
         if (!$price) throw new Error("failed to get price");
