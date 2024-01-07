@@ -8,13 +8,14 @@ use OpenAI;
 use RPurinton\Mir4nft\{
     LogFactory,
     MySQL,
-    OpenAI\Client
+    OpenAI\Client,
+    RabbitMQ\Publisher
 };
 
 $log = LogFactory::create('fillprices');
 $sql = new MySQL($log);
 $ai = new Client($log);
-
+$pub = new Publisher();
 $query = "SELECT sq.transportID, MAX(sq.seq) AS seq
 FROM `sequence` sq
 LEFT JOIN `evals` ev ON sq.transportID = ev.transportID
