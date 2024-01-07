@@ -35,6 +35,6 @@ while ($row = $result->fetch_assoc()) {
         'stat_check' => 'priceeval',
         'stat_url' => ''
     ];
-    $pub->publish('stat_check', $message);
+    $pub->publish('stat_checker', $message);
 }
 echo ("done!\n");
