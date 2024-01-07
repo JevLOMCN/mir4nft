@@ -7,7 +7,7 @@ require_once(__DIR__ . '/../../Composer.php');
 
 $embed = [
     'title' => '120 Taoist 231,203',
-    'description' => 'GREAT DEAL!',
+    'description' => "GREAT DEAL!\n<t:" . time() . ':R>',
     'url' => 'https://xdraco.com',
     'timestamp' => date('c'),
     'color' => hexdec('00ff00'),
@@ -27,10 +27,7 @@ $embed = [
             'value' => "100%^\n$300",
             'inline' => true
         ]
-    ],
-    'footer' => [
-        'text' => '<t:' . time() . ':R>'
-    ],
+    ]
 ];
 
 new Webhook([
