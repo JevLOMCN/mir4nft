@@ -123,7 +123,7 @@ class NewListingsConsumer
 
     private function insert_records($listing): array
     {
-        $this->log->debug("inserting records", [$listing]);
+        $this->log->debug("inserting records");
         extract($this->sql->escape($listing)) or throw new Error("failed to extract escaped listing");
 
         $result = $this->sql->query("SELECT `seq` FROM `sequence` WHERE `transportID` = '$transportID' AND `tradeType` = '1';") or throw new Error("failed to get sequence");
