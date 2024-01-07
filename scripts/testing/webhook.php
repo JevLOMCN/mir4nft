@@ -6,45 +6,31 @@ require_once(__DIR__ . '/../../Composer.php');
 
 
 $embed = [
-    'title' => 'Title of the Embed',
-    'description' => 'Description of the Embed',
-    'url' => 'https://example.com',
-    'timestamp' => date('Y-m-d\TH:i:s.vZ'),
-    'color' => hexdec('ff0000'),
-    'footer' => [
-        'text' => 'Footer Text',
-        'icon_url' => 'https://example.com/footer-icon.png'
-    ],
-    'image' => [
-        'url' => 'https://example.com/image.png'
-    ],
-    'thumbnail' => [
-        'url' => 'https://example.com/thumbnail.png'
-    ],
-    'video' => [
-        'url' => 'https://example.com/video.mp4'
-    ],
-    'provider' => [
-        'name' => 'Provider Name',
-        'url' => 'https://example.com/provider'
-    ],
-    'author' => [
-        'name' => 'Author Name',
-        'url' => 'https://example.com/author',
-        'icon_url' => 'https://example.com/author-icon.png'
-    ],
+    'title' => '120 Taoist 231,203',
+    'description' => 'GREAT DEAL!',
+    'url' => 'https://xdraco.com',
+    'timestamp' => date('c'),
+    'color' => hexdec('00ff00'),
     'fields' => [
         [
-            'name' => 'Field 1',
-            'value' => 'Value 1',
-            'inline' => false
+            'name' => '**__Ask__**',
+            'value' => "W100\n$300",
+            'inline' => true
         ],
         [
-            'name' => 'Field 2',
-            'value' => 'Value 2',
+            'name' => '**__Value__**',
+            'value' => "W200\n$600",
+            'inline' => true
+        ],
+        [
+            'name' => '**__Diff__**',
+            'value' => "100%^\n$300",
             'inline' => true
         ]
     ]
 ];
 
-new Webhook(['embeds' => [$embed]]);
+new Webhook([
+    'content' => '<t:' . time() . ':R>',
+    'embeds' => [$embed]
+]);
