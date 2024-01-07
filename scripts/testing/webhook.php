@@ -9,7 +9,6 @@ $embed = [
     'title' => '120 Taoist 231,203',
     'description' => "GREAT DEAL!\n<t:" . time() . ':R>',
     'url' => 'https://xdraco.com',
-    'timestamp' => date('c'),
     'color' => hexdec('00ff00'),
     'fields' => [
         [
