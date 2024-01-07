@@ -25,7 +25,7 @@ class HTTPS
                 'header' => implode("\r\n", $headers),
                 'content' => $body
             ]
-        ])) or throw new Error("failed to get contents");
+        ]));
         return $response;
     }
 }
