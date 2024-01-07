@@ -81,7 +81,7 @@ class StatCheckConsumer
             }
         }
         $this->sql->multi($query);
-        $this->log->debug("inserted stats", [$query]);
+        $this->log->debug("inserted $stat_check", [$transportID]);
         return true;
     }
 
