@@ -4,9 +4,10 @@ namespace RPurinton\Mir4nft\Consumers;
 
 use Bunny\{Channel, Message};
 use React\EventLoop\LoopInterface;
-use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error, Export};
+use RPurinton\Mir4nft\{Log, MySQL, HTTPS, Error, Export, DealText};
 use RPurinton\Mir4nft\RabbitMQ\Consumer;
 use RPurinton\Mir4nft\OpenAI\Client;
+use RPurinton\Mir4nft\Discord\Webhook;
 
 class StatCheckConsumer
 {
@@ -49,6 +50,7 @@ class StatCheckConsumer
     private function insert_stats($data): bool
     {
         extract($data) or throw new Error("failed to extract data");
+        if ($stat_check === 'notify') return $this->notify($seq, $transportID);
         if ($stat_check === 'priceeval') return $this->price_eval($seq, $transportID);
         $response = HTTPS::get($stat_url) or throw new Error("failed to get url");
         $response_escaped = $this->sql->escape($response);
@@ -85,13 +87,18 @@ class StatCheckConsumer
         return true;
     }
 
-    private function price_eval($seq, $transportID): bool
+    private function wait_stats($seq, $transport): \mysqli_result
     {
         $this->log->debug("waiting for all stats to be available");
         $retries = 0;
         while (true) {
             if ($retries++ > 60) throw new Error("timed out waiting for stats");
-            $result = $this->sql->query("SELECT `summary`.`json` AS `summary`,
+            $result = $this->sql->query("SELECT 
+                    `sequence`.`price` AS `ask_wemix`,
+                    `transports`.`lv` AS `lv`,
+                    `transports`.`class` AS `class`,
+                    `transports`.`powerScore` AS `powerScore`,
+                    `summary`.`json` AS `summary`,
                     `assets`.`json` AS `assets`,
                     `building`.`json` AS `building`,
                     `codex`.`json` AS `codex`,
@@ -116,12 +123,19 @@ class StatCheckConsumer
                 INNER JOIN `spirit` ON `sequence`.`transportID` = `spirit`.`transportID`
                 INNER JOIN `stats` ON `sequence`.`transportID` = `stats`.`transportID`
                 INNER JOIN `training` ON `sequence`.`transportID` = `training`.`transportID`
-                WHERE `sequence`.`seq` = $seq");
-            if (!$result) throw new Error("failed to get stats");
+                INNER JOIN `transports` ON `sequence`.`transportID` = `transports`.`transportID`
+                WHERE `sequence`.`transportID` = '$transport' AND `sequence`.`seq` = $seq
+            ") or throw new Error("failed to get stats");
             if ($result->num_rows == 1) break;
             sleep(1);
         }
-        $this->log->debug("all stats are available, getting price...");
+        $this->log->debug("all stats are available");
+        return $result;
+    }
+
+    private function price_eval($seq, $transportID): bool
+    {
+        $result = $this->wait_stats($seq, $transportID);
         $row = $result->fetch_assoc();
         $record = Export::row($row);
         $record = json_encode($record) . "\n";
@@ -136,5 +150,52 @@ class StatCheckConsumer
         $query = "INSERT INTO `evals` (`transportID`, `usd_price`) VALUES ('$transportID', '$price_escaped')";
         $this->sql->query($query);
         return true;
+    }
+
+    private function wait_eval($seq, $transportID): \mysqli_result
+    {
+        $this->log->debug("waiting for eval to be available");
+        $retries = 0;
+        while (true) {
+            if ($retries++ > 60) throw new Error("timed out waiting for eval");
+            $result = $this->sql->query("SELECT `usd_price` AS `value_usd` FROM `evals` WHERE `transportID` = '$transportID' ORDER BY `evalID` DESC LIMIT 1") or throw new Error("failed to get eval");
+            if ($result->num_rows == 1) break;
+            sleep(1);
+        }
+        $this->log->debug("eval is available");
+        return $result;
+    }
+
+    private function notify($seq, $transportID): bool
+    {
+        $stats = $this->wait_stats($seq, $transportID);
+        $eval = $this->wait_eval($seq, $transportID);
+        extract($stats->fetch_assoc());
+        extract($eval->fetch_assoc());
+        $this->log->debug("notifying", [$seq, $transportID, $usd_price]);
+        $ask_usd = $this->getUSD($ask_wemix);
+        $value_wemix = $this->getWEMIX($value_usd);
+        $diff_usd = $value_usd - $ask_usd;
+        $diff_pct = round($diff_usd / $ask_usd * 100);
+        $dealtext = DealText::get($diff_pct);
+        $color = DealText::color($diff_pct);
+        new Webhook(['embeds' => [Webhook::embed($lv, $class, $powerScore, $dealtext, $seq, $color, $ask_wemix, $ask_usd, $value_wemix, $value_usd, $diff_pct, $diff_usd)]]);
+        return true;
+    }
+
+    private function getWEMIX(int $usd): int
+    {
+        return (int)round($usd / $this->getWemixRate());
+    }
+
+    private function getUSD(int $wemix): int
+    {
+        return (int)round($wemix * $this->getWemixRate());
+    }
+
+    private function getWemixRate(): float
+    {
+        extract($this->sql->single("SELECT `USDWemixRate` FROM `wemix` ORDER BY `record_id` DESC LIMIT 1"));
+        return $USDWemixRate ?? 0;
     }
 }
