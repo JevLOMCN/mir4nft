@@ -11,7 +11,9 @@ class NewListingsConsumer
     private int $max_seq = 0;
     private string $wemix_url = "https://api.mir4global.com/wallet/prices/draco/daily";
     private array $wemix_data = [];
-    private string $completed_url = "https://webapi.mir4global.com/nft/lists?listType=recent&page=1&class=0&levMin=0&levMax=0&powerMin=0&powerMax=0&priceMin=0&priceMax=0&languageCode=en";
+    private string $completed_url = "https://webapi.mir4global.com/nft/lists?"
+        . "listType=recent&page=1&class=0&levMin=0&levMax=0"
+        . "&powerMin=0&powerMax=0&priceMin=0&priceMax=0&languageCode=en";
     private string $base_url = "https://webapi.mir4global.com/nft/";
     private string $lists_url = "lists?";
     private array $http_query = [
@@ -35,7 +37,6 @@ class NewListingsConsumer
         "training", "holystuff", "assets", "potential", "codex",
         "priceeval", // special case
     ];
-    private array $pending_sales = [];
     private ?Publisher $pub = null;
 
     public function __construct(
@@ -192,27 +193,13 @@ class NewListingsConsumer
         $this->pub->publish('stat_checker', $payload) or throw new Error("failed to publish stat check");
         return true;
     }
-
     private function check_completed(): bool
     {
         $this->log->debug("checking completed");
-        $this->update_pending_sales() or throw new Error("failed to update pending sales");
         $response = HTTPS::get($this->completed_url) or throw new Error("failed to get completed");
         $data = json_decode($response, true);
         $this->validate_completed($data) or throw new Error("received invalid response");
         $this->process_completed($data['data']['lists']) or throw new Error("failed to process completed");
-        return true;
-    }
-
-    private function update_pending_sales(): bool
-    {
-        $this->log->debug("updating pending sales");
-        $result = $this->sql->query("SELECT `seq`,`transportID` FROM `sequence` WHERE `tradeType` = '1';") or throw new Error("failed to get pending sales");
-        $pending_sales = [];
-        while ($row = $result->fetch_assoc()) {
-            $pending_sales[$row['seq']] = $row['transportID'];
-        }
-        $this->pending_sales = $pending_sales;
         return true;
     }
 
@@ -226,8 +213,11 @@ class NewListingsConsumer
     {
         $this->log->debug("processing completed");
         foreach ($listings as $listing) {
-            if (!isset($this->pending_sales[$listing['info']['seq']])) continue;
-            $this->process_completed_listing($listing['info']) or throw new Error("failed to process completed listing");
+            $seq = $listing['info']['seq'];
+            $result = $this->sql->query("SELECT `seq`,`transportID` FROM `sequence` WHERE `tradeType` IN ('1', '2') AND `seq` = '$seq';") or throw new Error("failed to get pending sales");
+            if ($result->num_rows > 0) {
+                $this->process_completed_listing($listing['info']) or throw new Error("failed to process completed listing");
+            }
         }
         return true;
     }
@@ -242,7 +232,6 @@ class NewListingsConsumer
         $this->sql->query($query) or throw new Error("failed to update sequence");
         return true;
     }
-
     private function get_usd_price($listing)
     {
         $this->log->debug("getting usd price", [$listing]);
