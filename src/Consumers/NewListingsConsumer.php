@@ -156,6 +156,7 @@ class NewListingsConsumer
             `MiraX` = '$MiraX',
             `Reinforce` = '$Reinforce';") or throw new Error("failed to insert sequence");
         $this->log->debug("inserted new listing");
+        $this->stat_check($seq, $transportID, $class, "notify") or throw new Error("failed to publish notificaton");
         return [$seq, $transportID, $class, $cancelling ?? [], $transport_exists_already ?? false];
     }
 
@@ -171,7 +172,7 @@ class NewListingsConsumer
     private function stat_check($seq, $transportID, $class, $stat_check): bool
     {
         $this->log->debug("stat check", [$stat_check]);
-        if ($stat_check === "priceeval") $count = 0;
+        if ($stat_check === "priceeval" || $stat_check === "notify") $count = 0;
         elseif ($stat_check !== "summary") extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `transportID` = '$transportID';")) or throw new Error("failed to get stat check count");
         else extract($this->sql->single("SELECT count(1) as `count` FROM `$stat_check` WHERE `seq` = '$seq';")) or throw new Error("failed to get stat check count");
         if ($count) return true;
