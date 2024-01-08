@@ -172,7 +172,7 @@ class StatCheckConsumer
         $eval = $this->wait_eval($seq, $transportID);
         extract($stats->fetch_assoc());
         extract($eval->fetch_assoc());
-        $this->log->debug("notifying", [$seq, $transportID, $usd_price]);
+        $this->log->debug("notifying", [$seq, $transportID, $value_usd, $ask_wemix]);
         $ask_usd = $this->getUSD($ask_wemix);
         $value_wemix = $this->getWEMIX($value_usd);
         $diff_usd = $value_usd - $ask_usd;
