@@ -2,7 +2,7 @@
 
 namespace RPurinton\Mir4nft\Mir4;
 
-class ClassNames
+class ClassName
 {
     public static function get(int $class_id): string
     {

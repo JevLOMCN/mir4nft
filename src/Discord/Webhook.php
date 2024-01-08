@@ -3,10 +3,10 @@
 namespace RPurinton\Mir4nft\Discord;
 
 use RPurinton\Mir4nft\{
+    Mir4\ClassName,
     HTTPS,
     Error,
 };
-use RPurinton\Mir4nft\Mir4\ClassNames;
 
 class Webhook
 {
@@ -32,7 +32,7 @@ class Webhook
         int $diff_pct,
         int $diff_usd
     ): array {
-        $class = ClassNames::get($class);
+        $class = ClassName::get($class);
         $power = number_format($power, 0, '.', ',');
         return [
             'title' => "$lv $class $power",
