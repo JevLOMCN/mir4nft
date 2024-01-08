@@ -179,7 +179,8 @@ class StatCheckConsumer
         $diff_pct = round($diff_usd / $ask_usd * 100);
         $dealtext = DealText::get($diff_pct);
         $color = DealText::color($diff_pct);
-        new Webhook(['embeds' => [Webhook::embed($lv, $class, $powerScore, $dealtext, $seq, $color, $ask_wemix, $ask_usd, $value_wemix, $value_usd, $diff_pct, $diff_usd)]]);
+        if ($diff_pct >= 20 && $ask_wemix <= 100) $content = "<@1192961374515642528>";
+        new Webhook(['content' => $content ?? '', 'embeds' => [Webhook::embed($lv, $class, $powerScore, $dealtext, $seq, $color, $ask_wemix, $ask_usd, $value_wemix, $value_usd, $diff_pct, $diff_usd)]]);
         return true;
     }
 
