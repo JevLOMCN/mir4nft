@@ -14,6 +14,18 @@ while ($row = $result->fetch_assoc()) {
 	$seq = $row['seq'];
 	$transportID = $row['transportID'];
 	echo ("\rRow $counter of $count - $seq...");
+	$transport = $sql->query("SELECT * FROM `transports` WHERE `transportID` = '$transportID'");
+	if ($transport->num_rows == 0) die("\ntransport not found for $transportID");
+	$checks_passed++;
+	$summary = $sql->query("SELECT `json` FROM `summary` WHERE `seq` = '$seq'");
+	if ($summary->num_rows == 0) die("\nsummary not found for $seq");
+	$summary = $summary->fetch_assoc()['json'];
+	$summary = json_decode($summary, true);
+	if (!$summary) die("\nsummary not valid json for $seq");
+	if (!isset($summary['code'])) die("\nsummary missing code for $seq");
+	if (!isset($summary['data'])) die("\nsummary missing data for $seq");
+	if ($summary['code'] != 200) die("\nsummary code not 200 for $seq");
+	$checks_passed++;
 	foreach ($stat_checks as $stat_check) {
 		$stat = $sql->query("SELECT `json` FROM `$stat_check` WHERE `transportID` = '$transportID'");
 		if ($stat->num_rows == 0) die("\n$stat_check not found for $transportID");

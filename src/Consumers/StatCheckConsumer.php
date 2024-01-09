@@ -124,7 +124,7 @@ class StatCheckConsumer
                 INNER JOIN `stats` ON `sequence`.`transportID` = `stats`.`transportID`
                 INNER JOIN `training` ON `sequence`.`transportID` = `training`.`transportID`
                 INNER JOIN `transports` ON `sequence`.`transportID` = `transports`.`transportID`
-                WHERE `sequence`.`transportID` = '$transport' AND `sequence`.`seq` = $seq
+                WHERE `sequence`.`seq` = $seq
             ") or throw new Error("failed to get stats");
             if ($result->num_rows == 1) break;
             sleep(1);
