@@ -24,7 +24,7 @@ class StatusUpdater
     public function update_status(): void
     {
         $this->log->info("Updating status");
-        $result = $this->sql->query("SELECT `seq`, `transportID` FROM `sequence` WHERE `tradeType` = '1';") or throw new Error("failed to get current listings");
+        $result = $this->sql->query("SELECT `seq`, `transportID` FROM `sequence` WHERE `tradeType` = '1' OR `tradeType` = '2';") or throw new Error("failed to get current listings");
         while ($row = $result->fetch_assoc()) {
             extract($row);
             $this->log->debug("updating status", [$seq, $transportID]);
