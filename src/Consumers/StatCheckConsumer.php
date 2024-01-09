@@ -65,7 +65,7 @@ class StatCheckConsumer
                 `seq`, `json`
             ) VALUES (
                 '$seq', '$response_escaped'
-            ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';\n";
+            ) ON DUPLICATE KEY UPDATE `seq` = `seq`;\n";
             $response_data = json_decode($response, true)['data'] ?? null;
             if ($response_data) {
                 $tradeType = $response_data['tradeType'] ?? null;
