@@ -59,7 +59,7 @@ class StatCheckConsumer
                 `transportID`, `json`
             ) VALUES (
                 '$transportID', '$response_escaped'
-            ) ON DUPLICATE KEY UPDATE `json` = '$response_escaped';\n";
+            ) ON DUPLICATE KEY UPDATE `seq` = `seq`;\n";
         } else {
             $query = "INSERT INTO `summary` (
                 `seq`, `json`
