@@ -2,7 +2,7 @@
 <?php
 
 namespace RPurinton\Mir4nft;
-
+die();
 use RPurinton\Mir4nft\{MySQL, Error};
 use RPurinton\Mir4nft\Consumers\StatusUpdater;
 
